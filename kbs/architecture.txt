@@ -1,0 +1,166 @@
+# Software Architecture Knowledge Base - Sarah Chen
+
+## Architectural Principles
+
+### SOLID Principles
+- **Single Responsibility**: Each class should have one reason to change
+- **Open/Closed**: Open for extension, closed for modification
+- **Liskov Substitution**: Objects should be replaceable with instances of their subtypes
+- **Interface Segregation**: Clients shouldn't depend on interfaces they don't use
+- **Dependency Inversion**: Depend on abstractions, not concretions
+
+### Design Patterns
+- **Creational**: Singleton, Factory, Builder, Prototype
+- **Structural**: Adapter, Decorator, Facade, Proxy
+- **Behavioral**: Observer, Strategy, Command, State Machine
+- **Architectural**: MVC, MVP, MVVM, Hexagonal Architecture
+
+### System Architecture Patterns
+
+#### Microservices Architecture
+- **Benefits**: Independent deployment, technology diversity, fault isolation
+- **Challenges**: Distributed complexity, data consistency, network latency
+- **Best Practices**: Domain-driven design, API-first approach, eventual consistency
+- **Communication**: REST APIs, GraphQL, message queues, event streaming
+
+#### Monolithic Architecture
+- **Benefits**: Simple deployment, easier debugging, better performance
+- **Challenges**: Technology lock-in, scaling bottlenecks, team dependencies
+- **When to Use**: Small teams, simple domains, rapid prototyping
+
+#### Event-Driven Architecture
+- **Components**: Event producers, event routers, event consumers
+- **Patterns**: Event sourcing, CQRS, saga pattern
+- **Technologies**: Apache Kafka, RabbitMQ, AWS EventBridge, Azure Service Bus
+
+### Scalability Patterns
+
+#### Horizontal vs Vertical Scaling
+- **Horizontal (Scale-out)**: Add more servers/instances
+- **Vertical (Scale-up)**: Increase server resources (CPU, RAM, storage)
+- **Considerations**: Cost, complexity, maximum limits
+
+#### Load Balancing
+- **Types**: Round-robin, weighted, least connections, IP hash
+- **Levels**: DNS, L4 (transport), L7 (application)
+- **Technologies**: NGINX, HAProxy, AWS ALB/NLB, Cloudflare
+
+#### Caching Strategies
+- **Client-side**: Browser cache, mobile app cache
+- **CDN**: Geographic distribution of static assets
+- **Application**: In-memory (Redis, Memcached), database query cache
+- **Database**: Query result caching, materialized views
+
+### Database Architecture
+
+#### SQL vs NoSQL
+- **SQL**: ACID compliance, complex queries, structured data
+- **NoSQL**: Horizontal scaling, flexible schema, eventual consistency
+- **NewSQL**: ACID + horizontal scaling (CockroachDB, TiDB)
+
+#### Data Consistency Patterns
+- **Strong Consistency**: All nodes see the same data simultaneously
+- **Eventual Consistency**: System will become consistent over time
+- **Weak Consistency**: No guarantees about when consistency occurs
+- **BASE**: Basically Available, Soft state, Eventual consistency
+
+#### Sharding Strategies
+- **Horizontal**: Split rows across multiple databases
+- **Vertical**: Split columns/tables across databases
+- **Functional**: Split by feature/service domain
+- **Key Considerations**: Shard key selection, rebalancing, cross-shard queries
+
+### Security Architecture
+
+#### Authentication & Authorization
+- **Authentication**: OAuth 2.0, SAML, JWT tokens, multi-factor authentication
+- **Authorization**: RBAC (Role-Based), ABAC (Attribute-Based), ACL
+- **Zero Trust**: Never trust, always verify, least privilege access
+
+#### API Security
+- **Rate Limiting**: Protect against abuse and DoS attacks
+- **Input Validation**: Sanitize and validate all inputs
+- **HTTPS Everywhere**: TLS 1.3, certificate management
+- **API Keys/Tokens**: Secure generation, rotation, revocation
+
+### Performance Architecture
+
+#### Performance Metrics
+- **Latency**: Response time for single requests
+- **Throughput**: Requests processed per unit time
+- **Availability**: System uptime percentage (99.9%, 99.99%)
+- **Error Rate**: Percentage of failed requests
+
+#### Optimization Strategies
+- **Database**: Query optimization, indexing, connection pooling
+- **Application**: Code profiling, memory management, async processing
+- **Network**: Compression, CDN usage, HTTP/2, connection reuse
+- **Infrastructure**: Auto-scaling, resource allocation
+
+### Cloud Architecture Patterns
+
+#### Multi-Cloud Strategy
+- **Benefits**: Vendor independence, disaster recovery, cost optimization
+- **Challenges**: Complexity, data transfer costs, skill requirements
+- **Approaches**: Cloud-agnostic tools, abstraction layers
+
+#### Serverless Architecture
+- **Benefits**: No server management, automatic scaling, pay-per-use
+- **Challenges**: Cold starts, vendor lock-in, debugging complexity
+- **Use Cases**: Event processing, APIs, batch jobs, scheduled tasks
+
+#### Container Architecture
+- **Benefits**: Consistency, portability, resource efficiency
+- **Orchestration**: Kubernetes, Docker Swarm, AWS ECS
+- **Patterns**: Sidecar, ambassador, adapter, init containers
+
+### Monitoring & Observability
+
+#### The Three Pillars
+- **Logs**: Structured logging, centralized aggregation
+- **Metrics**: System and business metrics, alerting thresholds
+- **Traces**: Distributed tracing across services
+
+#### Implementation
+- **Tools**: Prometheus, Grafana, Jaeger, ELK Stack, Datadog
+- **Practices**: SLI/SLO definition, error budgets, runbooks
+- **Culture**: Blameless post-mortems, continuous improvement
+
+### Technology Selection Criteria
+
+#### Evaluation Framework
+- **Technical Fit**: Performance, scalability, reliability requirements
+- **Team Fit**: Learning curve, existing expertise, maintainability
+- **Ecosystem**: Community support, documentation, third-party integrations
+- **Business Fit**: Licensing costs, vendor stability, long-term viability
+
+#### Architecture Decision Records (ADRs)
+- **Structure**: Context, Decision, Status, Consequences
+- **Purpose**: Document significant architectural decisions
+- **Benefits**: Knowledge sharing, decision traceability, onboarding
+
+### Common Anti-Patterns
+
+#### Technical Debt
+- **Big Ball of Mud**: Lack of structure, tightly coupled components
+- **God Object**: Single class/module doing too much
+- **Spaghetti Code**: Tangled control flow, poor separation of concerns
+
+#### Distributed Systems
+- **Distributed Monolith**: Microservices with tight coupling
+- **Chatty Interfaces**: Too many fine-grained service calls
+- **Shared Database**: Multiple services accessing same database
+
+### Architecture Review Process
+
+#### Regular Assessments
+- **Code Reviews**: Architecture impact of changes
+- **Design Reviews**: Major feature/system designs
+- **Technology Reviews**: Periodic evaluation of tech stack
+- **Performance Reviews**: Regular performance analysis
+
+#### Documentation Standards
+- **System Diagrams**: C4 model, UML, sequence diagrams
+- **API Documentation**: OpenAPI/Swagger specifications
+- **Deployment Guides**: Environment setup, configuration
+- **Troubleshooting**: Common issues and solutions

@@ -4,11 +4,15 @@ from __future__ import annotations
 
 import logging
 import os
+import re
+from pathlib import Path
 
 import discord
 
-from .agent import get_agent
+from .agent import get_agent, get_persona_agent
+from .config import get_config, PersonaConfig
 from .dependencies import Deps
+from .webhook_manager import get_webhook_manager
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +30,8 @@ class AITeamBot(discord.Client):
 
         self.agent = get_agent()
         self.default_knowledge_base = default_knowledge_base
+        self.config = get_config()
+        self.webhook_manager = get_webhook_manager()
 
     async def on_ready(self) -> None:
         """Called when the bot is ready."""
@@ -67,6 +73,24 @@ class AITeamBot(discord.Client):
 
         return None
 
+    def detect_persona_mention(self, message: discord.Message) -> PersonaConfig | None:
+        """Check if a persona was mentioned and return the persona config.
+
+        Args:
+            message: The Discord message to check for persona mentions.
+
+        Returns:
+            The PersonaConfig for the mentioned persona, or None if no persona was mentioned.
+        """
+        # Check for @PersonaName mentions in the message content
+        for persona in self.config.personas:
+            # Look for @PersonaName mentions (case-insensitive)
+            pattern = rf"@{re.escape(persona.name)}\b"
+            if re.search(pattern, message.content, re.IGNORECASE):
+                return persona
+
+        return None
+
     async def on_message(self, message: discord.Message) -> None:
         """Handle incoming messages."""
         # Ignore messages from bots to prevent infinite loops
@@ -74,6 +98,15 @@ class AITeamBot(discord.Client):
             return
 
         logger.debug(f"Received message: {message.content}")
+
+        # Check for persona mentions first
+        persona_config = self.detect_persona_mention(message)
+        if persona_config:
+            logger.info(
+                f"Persona {persona_config.name} mentioned in message: {message.content}"
+            )
+            await self._handle_persona_mention(message, persona_config)
+            return
 
         # Check if the bot was mentioned
         mention_string = self.bot_mentioned(message)
@@ -109,6 +142,78 @@ class AITeamBot(discord.Client):
                 "I apologize, but I encountered an error processing your request. "
                 + "Please try again later."
             )
+
+    async def _handle_persona_mention(
+        self, message: discord.Message, persona_config: PersonaConfig
+    ) -> None:
+        """Handle a message that mentions a specific persona."""
+        try:
+            # Extract the query by removing the persona mention
+            pattern = rf"@{re.escape(persona_config.name)}\b"
+            query = re.sub(pattern, "", message.content, flags=re.IGNORECASE).strip()
+
+            # Handle empty queries
+            if not query:
+                response_content = (
+                    f"Hello, {message.author.mention}! I'm {persona_config.display_name}, "
+                    f"{persona_config.role}. How can I help you?"
+                )
+
+                # Try to send as persona via webhook, fallback to normal message
+                if isinstance(message.channel, discord.TextChannel):
+                    webhook_message = await self.webhook_manager.send_as_persona(
+                        message.channel,
+                        persona_config,
+                        response_content,
+                        reply_to=message,
+                    )
+                    if webhook_message:
+                        return
+
+                # Fallback to regular message if webhook fails
+                _ = await message.channel.send(response_content)
+                return
+
+            # Process the query with the persona's RAG agent
+            knowledge_base_path = persona_config.get_knowledge_base_path()
+            deps = Deps(file_path=str(knowledge_base_path))
+
+            # Get the persona-specific agent
+            persona_agent = get_persona_agent(persona_config)
+            response = await persona_agent.run(query, deps=deps)
+
+            # Send the response as the persona via webhook if possible
+            if isinstance(message.channel, discord.TextChannel):
+                webhook_message = await self.webhook_manager.send_as_persona(
+                    message.channel, persona_config, response.output, reply_to=message
+                )
+                if webhook_message:
+                    return
+
+            # Fallback to regular message if webhook fails
+            _ = await message.channel.send(
+                f"**{persona_config.display_name}** ({persona_config.role}):\n{response.output}"
+            )
+
+        except Exception as e:
+            logger.error(
+                f"Error processing persona mention for {persona_config.name}: {e}"
+            )
+
+            error_message = (
+                f"I apologize, {message.author.mention}, but I encountered an error "
+                f"processing your request. Please try again later."
+            )
+
+            # Try to send error as persona, fallback to regular message
+            if isinstance(message.channel, discord.TextChannel):
+                webhook_message = await self.webhook_manager.send_as_persona(
+                    message.channel, persona_config, error_message, reply_to=message
+                )
+                if webhook_message:
+                    return
+
+            _ = await message.channel.send(error_message)
 
 
 def create_bot(knowledge_base_path: str | None = None) -> AITeamBot:

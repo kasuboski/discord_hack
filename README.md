@@ -1,6 +1,8 @@
 # AI Team Bot - Discord RAG Assistant
 
-A multi-persona AI agent for Discord designed to assist software development teams using Retrieval-Augmented Generation (RAG). Built with Python, discord.py, pydantic-ai, and powered by Meta Llama models via Cerebras API.
+The **AI Team Bot** is a multi-persona AI agent for Discord designed to assist software development teams. It leverages Retrieval-Augmented Generation (RAG) to provide contextually relevant answers from project-specific knowledge bases. The system features distinct AI "personas" (e.g., Project Manager, Lead Architect) that can be directly mentioned for targeted queries.
+
+Built with Python, discord.py, pydantic-ai, and powered by Meta Llama models via the Cerebras API.
 
 ## 🚀 Quick Start
 
@@ -29,129 +31,57 @@ export DISCORD_BOT_TOKEN="your_discord_bot_token_here"
 export CEREBRAS_API_KEY="your_cerebras_api_key_here"
 ```
 
-### Usage
-
-#### Discord Bot Mode
+### Running the Bot
 
 Start the Discord bot:
 ```bash
-uv run python src/main.py discord
+uv run src/main.py discord
 ```
 
-Or with a custom knowledge base:
-```bash
-uv run python src/main.py discord path/to/your/knowledge_base.txt
-```
+## 🤖 Features
 
-#### CLI Mode (for testing)
+- **Multi-Persona Support**: Interact with a team of AI assistants, each with a unique personality, avatar, and knowledge base (e.g., `@JohnPM`, `@SarahArch`).
+- **Persona Mention Detection**: Mention a persona directly (`@PersonaName`) to get a targeted answer from their specific domain of expertise.
+- **Webhook-Based Impersonation**: Each persona responds with their own name and a unique, dynamically generated avatar.
+- **Persona-Specific RAG**: Each persona has an isolated knowledge base, ensuring domain-specific and contextually relevant answers.
+- **Dynamic Configuration**: Personas are defined and managed through `personas.json`, allowing for easy customization.
+- **General Bot Interaction**: Mention the bot by its name (`@AITeamBot`) for general questions.
 
-Test the RAG system directly:
-```bash
-uv run python src/main.py kbs/default.txt "What is the AI Team Bot?"
-```
+## Usage
 
-## 🤖 Discord Bot Features
+### Interacting with the Bot
 
-### Phase 2 Implementation (Current)
+- **General Question**: `@AITeamBot What is the project architecture?`
+- **Persona-Specific Question**: `@JohnPM how should we prioritize these features?`
+- **Empty Mention**: `@AITeamBot` (The bot will greet you)
 
-- **@Mention Support**: Mention the bot (`@BotName`) followed by your question
-- **Knowledge Base Integration**: Responses are powered by RAG from project documentation
-- **Error Handling**: Graceful error handling and user feedback
-- **Logging**: Comprehensive logging for debugging and monitoring
+The bot will detect the mention and route the query to the appropriate agent.
 
-### Example Discord Usage
+## Development
 
-```
-@AITeamBot What is the project architecture?
-@AITeamBot How do I set up the development environment?
-@AITeamBot
-```
+### Running Commands
+
+- **Run Tests**:
+  ```bash
+  uv run pytest
+  ```
+- **Lint and Format Code**:
+  ```bash
+  uv run ruff check --fix
+  uv run ruff format
+  ```
 
 ## 🏗️ Architecture
 
+The bot's architecture is designed around a multi-persona, RAG-based system. For a detailed overview, see [docs/arch.md](docs/arch.md).
+
 ### Core Components
 
-- **Discord Bot** (`discord_bot.py`): Discord.py integration with message handling
-- **RAG Agent** (`agent.py`): AI agent with retrieval-augmented generation
-- **Dependencies** (`dependencies.py`): Dependency injection for file paths
-- **Knowledge Base**: Text files in `kbs/` directory
-
-### Project Structure
-
-```
-src/
-├── discord_hack/
-│   ├── __init__.py
-│   ├── agent.py          # RAG agent implementation
-│   ├── dependencies.py   # Dependency injection
-│   ├── discord_bot.py    # Discord bot client
-│   └── discord_main.py   # Discord entry point
-├── main.py              # CLI and Discord entry points
-kbs/
-├── default.txt          # Default knowledge base
-└── kb.txt              # Additional knowledge base
-tests/
-├── test_agent.py        # Agent tests
-└── test_discord_bot.py  # Discord bot tests
-```
-
-## 🧪 Testing
-
-Run all tests:
-```bash
-uv run pytest
-```
-
-Run specific test files:
-```bash
-uv run pytest tests/test_discord_bot.py -v
-```
-
-Format code:
-```bash
-uv run ruff format
-uv run ruff check --fix
-```
-
-## 📋 Setup Guide
-
-### 1. Discord Bot Setup
-
-1. Go to [Discord Developer Portal](https://discord.com/developers/applications)
-2. Create a new application
-3. Go to the "Bot" section
-4. Copy the bot token and set it as `DISCORD_BOT_TOKEN`
-5. Enable "Message Content Intent" in the Privileged Gateway Intents section
-
-### 2. Discord Server Setup
-
-1. Generate an invite link with these permissions:
-   - Send Messages
-   - Read Messages
-   - Read Message History
-   - Use Slash Commands (future use)
-
-2. Invite the bot to your server
-
-### 3. Cerebras API Setup
-
-1. Get your Cerebras API key
-2. Set it as `CEREBRAS_API_KEY` environment variable
-
-## 🔧 Configuration
-
-### Knowledge Base
-
-- Place your knowledge base files in the `kbs/` directory
-- Supported formats: `.txt`, `.md`
-- The bot will read the entire file content for RAG context
-
-### Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `DISCORD_BOT_TOKEN` | Yes | Your Discord bot token |
-| `CEREBRAS_API_KEY` | Yes | Your Cerebras API key for Llama models |
+- **Discord Bot** (`discord_bot.py`): Manages Discord API integration, message handling, and webhook-based responses.
+- **RAG Agent** (`agent.py`): Core AI agent that uses Retrieval-Augmented Generation.
+- **Configuration Manager** (`config.py`): Loads and manages persona definitions from `personas.json`.
+- **Webhook Manager** (`webhook_manager.py`): Handles the creation and caching of Discord webhooks for persona impersonation.
+- **Knowledge Bases**: Text files in the `kbs/` directory, with each persona having its own dedicated knowledge source.
 
 ## 🚦 Development Phases
 
@@ -160,18 +90,17 @@ uv run ruff check --fix
 - [x] Integration with Cerebras/Llama models
 - [x] Basic knowledge base retrieval
 
-### ✅ Phase 2: Discord @Mention Integration (Current)
+### ✅ Phase 2: Discord @Mention Integration
 - [x] Discord.py bot with mention detection
 - [x] Message processing and query extraction
 - [x] Integration with existing RAG agent
 - [x] Error handling and logging
-- [x] Comprehensive testing
 
-### 🔄 Phase 3: Multi-Persona Team (Planned)
-- [ ] Multiple AI personas with distinct personalities
-- [ ] Persona-specific knowledge bases
-- [ ] Discord webhooks for persona avatars
-- [ ] Configuration-driven persona management
+### ✅ Phase 3: Multi-Persona Team & Dynamic RAG
+- [x] Multiple AI personas with distinct personalities and knowledge bases.
+- [x] Persona mention detection (`@PersonaName`).
+- [x] Discord webhooks for persona avatars and names.
+- [x] Configuration-driven persona management via `personas.json`.
 
 ### 🔄 Phase 4: Context-Aware Interjection (Planned)
 - [ ] Conversation tracking and context management
@@ -183,37 +112,17 @@ uv run ruff check --fix
 - [ ] Production deployment guides
 - [ ] Advanced error handling and monitoring
 
-## 💡 Usage Examples
+## 🔧 Configuration
 
-### Basic Q&A
-```
-User: @AITeamBot What is this project about?
-Bot: The AI Team Bot is a multi-persona AI agent designed for Discord to assist software development teams...
-```
+### Personas
+Personas are configured in `personas.json`. Each persona has a name, role, system prompt, and a path to their knowledge base.
 
-### Empty Mention
-```
-User: @AITeamBot
-Bot: Hello, @User! How can I help you?
-```
+### Environment Variables
 
-### Error Scenarios
-The bot gracefully handles:
-- API failures
-- Invalid knowledge base files
-- Rate limiting
-- Network issues
-
-## 🤝 Contributing
-
-1. Follow the existing code style (enforced by Ruff)
-2. Write tests for new functionality
-3. Update documentation as needed
-4. Run tests before submitting PRs
-
-## 📄 License
-
-This is a hackathon project. Please check with the project authors for licensing terms.
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DISCORD_BOT_TOKEN` | Yes | Your Discord bot token |
+| `CEREBRAS_API_KEY` | Yes | Your Cerebras API key for Llama models |
 
 ## 🔗 Technologies Used
 
@@ -224,7 +133,3 @@ This is a hackathon project. Please check with the project authors for licensing
 - **pytest** - Testing framework
 - **Ruff** - Code formatting and linting
 - **uv** - Fast Python package manager
-
-## 📞 Support
-
-This is a hackathon project. For issues or questions, please check the project documentation or contact the development team.

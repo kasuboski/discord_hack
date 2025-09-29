@@ -1,0 +1,73 @@
+# Project Management Knowledge Base - John Parker
+
+## Project Management Fundamentals
+
+### Agile Methodologies
+- **Scrum**: 2-4 week sprints with daily standups, sprint planning, reviews, and retrospectives
+- **Kanban**: Continuous flow with WIP limits and visual board management
+- **Sprint Planning**: Define sprint goals, estimate story points, assign tasks
+- **Daily Standups**: What did you do yesterday? What will you do today? Any blockers?
+
+### Project Planning Best Practices
+- Break down large features into smaller, manageable tasks (2-8 hour chunks)
+- Use story points for relative estimation (Fibonacci sequence: 1, 2, 3, 5, 8, 13)
+- Define clear acceptance criteria for each user story
+- Maintain a prioritized backlog with business value alignment
+- Plan for 70-80% capacity to account for unexpected work
+
+### Risk Management
+- **Technical Risks**: Unproven technologies, complex integrations, performance concerns
+- **Resource Risks**: Team member availability, skill gaps, dependencies on external teams
+- **Timeline Risks**: Scope creep, unrealistic estimates, external dependencies
+- **Mitigation Strategies**: Proof of concepts, cross-training, buffer time, contingency plans
+
+### Stakeholder Communication
+- **Weekly Status Reports**: Progress against milestones, blockers, next week's goals
+- **Sprint Demos**: Show working software to stakeholders every 2-4 weeks
+- **Escalation Paths**: Clear process for raising blockers and issues
+- **Change Requests**: Formal process for scope changes with impact analysis
+
+### Common Project Challenges
+- **Scope Creep**: New requirements added without adjusting timeline/resources
+- **Technical Debt**: Balance between speed and code quality
+- **Resource Constraints**: Team members pulled to other priorities
+- **Dependencies**: Waiting on external teams, third-party services, or approvals
+
+### Key Performance Indicators (KPIs)
+- **Velocity**: Story points completed per sprint
+- **Burn-down Rate**: Progress toward sprint/release goals
+- **Cycle Time**: Time from task start to completion
+- **Bug Rate**: Defects found per feature/sprint
+- **Customer Satisfaction**: User feedback and feature adoption
+
+### Meeting Management
+- **Stand-ups**: 15 minutes max, focus on progress and blockers
+- **Sprint Planning**: 1-2 hours per week of sprint duration
+- **Retrospectives**: What went well? What could improve? Action items
+- **Backlog Grooming**: Regular refinement of upcoming work
+
+### Tool Recommendations
+- **Project Tracking**: Jira, Azure DevOps, Linear, or GitHub Projects
+- **Communication**: Slack, Microsoft Teams, Discord
+- **Documentation**: Confluence, Notion, or GitHub Wiki
+- **Time Tracking**: Harvest, Toggl, or built-in project tools
+
+### Timeline Estimation Guidelines
+- **New Feature Development**: 2-6 weeks depending on complexity
+- **Bug Fixes**: 1-5 days depending on severity and scope
+- **Infrastructure Changes**: 1-3 weeks with testing and rollout
+- **Documentation**: 20% of development time for new features
+- **Testing**: 30-40% of development time for comprehensive testing
+
+### Team Dynamics
+- **Cross-functional Teams**: Include developers, designers, QA, and product owners
+- **Definition of Done**: Clear criteria for when work is truly complete
+- **Code Reviews**: Required for all changes, 1-2 reviewers minimum
+- **Knowledge Sharing**: Tech talks, pair programming, documentation
+- **Work-Life Balance**: Sustainable pace, avoid consistent overtime
+
+### Budget and Resource Management
+- **Team Composition**: Balance of senior and junior developers
+- **Skill Development**: Time for learning and professional growth
+- **Tool Costs**: Factor in licensing, infrastructure, and third-party services
+- **Contingency**: 10-20% buffer for unexpected requirements

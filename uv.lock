@@ -364,6 +364,7 @@ name = "discord-hack"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "aiohttp" },
     { name = "discord-py" },
     { name = "openai" },
     { name = "pydantic-ai" },
@@ -380,6 +381,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "aiohttp", specifier = ">=3.8.0" },
     { name = "discord-py", specifier = ">=2.6.3" },
     { name = "openai", specifier = ">=1.109.1" },
     { name = "pydantic-ai", specifier = ">=1.0.10" },
