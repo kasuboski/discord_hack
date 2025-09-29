@@ -116,12 +116,6 @@ Structured, validated output is enforced through Pydantic models.
 from pydantic import BaseModel, Field
 from typing import Optional
 
-# For the main RAG agent's response
-class AgentResponse(BaseModel):
-    """The final, structured answer from the agent."""
-    answer: str = Field(description="The clear and concise answer to the user's query.")
-    source_document: str = Field(description="The name of the source document used for the answer.")
-
 # For the Interjection Classifier agent
 class InterjectionDecision(BaseModel):
     """A model to decide whether to interject in a conversation."""
