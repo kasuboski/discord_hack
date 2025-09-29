@@ -4,7 +4,6 @@ from __future__ import annotations as _annotations
 
 import logging
 import os
-from pathlib import Path
 
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.openai import OpenAIChatModel

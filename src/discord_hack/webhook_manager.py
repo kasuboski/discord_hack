@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Dict, Optional
 
 import discord
 import aiohttp
@@ -25,7 +24,7 @@ class WebhookManager:
             webhooks_file: Path to the JSON file storing webhook URLs.
         """
         self.webhooks_file = Path(webhooks_file)
-        self._webhooks: Dict[int, str] = {}  # channel_id -> webhook_url
+        self._webhooks: dict[int, str] = {}  # channel_id -> webhook_url
         self._load_webhooks()
 
     def _load_webhooks(self) -> None:
@@ -66,7 +65,7 @@ class WebhookManager:
 
     async def get_webhook(
         self, channel: discord.TextChannel, persona_config: PersonaConfig
-    ) -> Optional[discord.Webhook]:
+    ) -> discord.Webhook | None:
         """Get or create a webhook for the given channel.
 
         Args:
@@ -126,8 +125,8 @@ class WebhookManager:
         channel: discord.TextChannel,
         persona_config: PersonaConfig,
         content: str,
-        reply_to: Optional[discord.Message] = None,
-    ) -> Optional[discord.WebhookMessage]:
+        reply_to: discord.Message | None = None,
+    ) -> discord.WebhookMessage | None:
         """Send a message as a persona using webhooks.
 
         Args:
@@ -209,7 +208,7 @@ class WebhookManager:
 
 
 # Global webhook manager instance
-_webhook_manager: Optional[WebhookManager] = None
+_webhook_manager: WebhookManager | None = None
 
 
 def get_webhook_manager() -> WebhookManager:
