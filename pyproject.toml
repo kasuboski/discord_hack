@@ -4,4 +4,20 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "openai>=1.109.1",
+    "pydantic-ai>=1.0.10",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
+    "ruff>=0.13.2",
+    "trio>=0.31.0",
+]
+
+[tool.ruff.lint]
+extend-select = [
+  "UP",  # pyupgrade
+]
