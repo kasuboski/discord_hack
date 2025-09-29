@@ -1,0 +1,49 @@
+# AI Team Bot - Default Knowledge Base
+
+## What is the AI Team Bot?
+
+The AI Team Bot is a multi-persona AI agent designed for Discord to assist software development teams. It leverages Retrieval-Augmented Generation (RAG) to provide contextually relevant answers from a project-specific knowledge base.
+
+## Key Features
+
+- **Multi-Persona System**: Different AI "personas" (e.g., Project Manager, Lead Architect) can be directly mentioned for targeted queries
+- **RAG Integration**: Uses retrieval-augmented generation to provide context-aware responses
+- **Discord Integration**: Native Discord bot with @mention support
+- **Proactive Interjection**: Can understand conversation context and contribute without being mentioned
+
+## How to Use
+
+1. **Direct Mention**: Use @BotName followed by your question to get a general response
+2. **Persona Mention**: Mention specific personas like @JohnPM for targeted expertise
+3. **Natural Conversation**: The bot can join conversations contextually when relevant
+
+## Technical Architecture
+
+The bot is built with:
+- Python and discord.py for Discord integration
+- pydantic-ai for structured AI agent behavior
+- Cerebras API with Meta Llama models for inference
+- Vector-based RAG system for knowledge retrieval
+- Docker containerization for deployment
+
+## Implementation Phases
+
+1. **Phase 1**: Core RAG Engine
+2. **Phase 2**: Discord @Mention Integration (Current)
+3. **Phase 3**: Multi-Persona Team & Dynamic RAG
+4. **Phase 4**: Dockerization & Context-Aware Interjection
+5. **Phase 5**: Polish, Documentation, and Submission
+
+## Getting Started
+
+To run the bot:
+1. Set your DISCORD_BOT_TOKEN environment variable
+2. Run `python main.py discord` to start the Discord bot
+3. Invite the bot to your server with appropriate permissions
+
+For CLI testing:
+- Run `python main.py <knowledge_base> <question>` for direct queries
+
+## Support
+
+This is a hackathon project focusing on innovative AI-powered team assistance in Discord environments.
