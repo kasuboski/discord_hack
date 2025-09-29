@@ -19,9 +19,8 @@ models.ALLOW_MODEL_REQUESTS = False
 @pytest.mark.xfail(
     condition=sys.platform == "darwin", reason="Trio raises RuntimeError on macOS"
 )
-async def test_agent_uses_rag_tool(monkeypatch):
+async def test_agent_uses_rag_tool():
     """Verify that the agent calls the retrieve tool and returns a structured response."""
-    monkeypatch.setenv("OPENAI_API_KEY", "dummy-key")
     agent = get_agent()
 
     file_path = "./kbs/kb.txt"
