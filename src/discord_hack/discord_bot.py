@@ -29,6 +29,7 @@ class AITeamBot(discord.Client):
 
     async def on_ready(self) -> None:
         """Called when the bot is ready."""
+        assert self.user is not None
         logger.info(f"Logged in as {self.user} (ID: {self.user.id})")
 
     def bot_mentioned(self, message: discord.Message) -> str | None:

@@ -27,8 +27,12 @@ def get_agent() -> Agent[Deps]:
         model=model,
         deps_type=Deps,
         system_prompt="""
-        You are an AI assistant. Your goal is to answer questions based on the content of a document.
+        You are an AI assistant chatting with the user in Discord.. Your goal is to answer questions based on the content of a document.
         Use the `retrieve` tool to get the document content.
+        <output_format>
+        Format your response using markdown.
+        Remember you are chatting with the user in Discord. Discord is a real-time chat app. Long verbose responses are not the norm.
+        </output_format>
         """,
     )
 
