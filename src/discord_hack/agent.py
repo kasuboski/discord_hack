@@ -20,7 +20,9 @@ def get_agent() -> Agent[Deps]:
         base_url="https://api.cerebras.ai/v1",
         api_key=os.environ.get("CEREBRAS_API_KEY"),
     )
-    model = OpenAIChatModel("llama3.1-8b", provider=cerebras_provider, profile=profile)
+    model = OpenAIChatModel(
+        "llama-4-scout-17b-16e-instruct", provider=cerebras_provider, profile=profile
+    )
     agent = Agent(
         model=model,
         deps_type=Deps,
