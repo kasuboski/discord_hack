@@ -145,6 +145,16 @@ class WebhookManager:
                 logger.error(f"Could not get webhook for channel {channel.id}")
                 return None
 
+            # Validate avatar URL
+            if not persona_config.avatar_url:
+                logger.warning(
+                    f"No avatar URL provided for persona {persona_config.name}"
+                )
+            else:
+                logger.debug(
+                    f"Using avatar URL for {persona_config.name}: {persona_config.avatar_url}"
+                )
+
             # Prepare the content with reply reference if needed
             final_content = content
             if reply_to:
@@ -157,6 +167,11 @@ class WebhookManager:
                 )
 
                 # Send the message via webhook
+                logger.debug(
+                    f"Sending webhook message as {persona_config.display_name} "
+                    f"with avatar URL: {persona_config.avatar_url or 'None (will use default)'}"
+                )
+
                 message = await webhook_with_session.send(
                     content=final_content,
                     username=persona_config.display_name,
@@ -167,8 +182,9 @@ class WebhookManager:
                     else None,
                 )
 
-                logger.debug(
-                    f"Sent message as {persona_config.display_name} in channel {channel.id}"
+                logger.info(
+                    f"Successfully sent webhook message as {persona_config.display_name} "
+                    f"in channel {channel.id} (Message ID: {message.id})"
                 )
                 return message
 
