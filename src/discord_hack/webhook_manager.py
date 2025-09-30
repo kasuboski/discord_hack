@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from pathlib import Path
 
 import discord
@@ -120,6 +121,55 @@ class WebhookManager:
             )
             return None
 
+    def _split_message(self, content: str, max_length: int = 2000) -> list[str]:
+        """Split a message into chunks that fit Discord's character limit.
+
+        Args:
+            content: The message content to split.
+            max_length: Maximum length per chunk (default 2000 for Discord).
+
+        Returns:
+            List of message chunks.
+        """
+        if len(content) <= max_length:
+            return [content]
+
+        chunks = []
+        current_chunk = ""
+
+        # Split by lines first to avoid breaking in the middle of a line
+        lines = content.split("\n")
+
+        for line in lines:
+            # If a single line is longer than max_length, split it by sentences
+            if len(line) > max_length:
+                # Split by common sentence endings
+                sentences = re.split(r"([.!?]+\s+)", line)
+                for sentence in sentences:
+                    if len(current_chunk) + len(sentence) > max_length:
+                        if current_chunk:
+                            chunks.append(current_chunk.strip())
+                            current_chunk = sentence
+                        else:
+                            # Even a single sentence is too long, force split
+                            chunks.append(sentence[:max_length])
+                            current_chunk = sentence[max_length:]
+                    else:
+                        current_chunk += sentence
+            # If adding this line would exceed the limit, start a new chunk
+            elif len(current_chunk) + len(line) + 1 > max_length:
+                if current_chunk:
+                    chunks.append(current_chunk.strip())
+                current_chunk = line + "\n"
+            else:
+                current_chunk += line + "\n"
+
+        # Add the last chunk
+        if current_chunk:
+            chunks.append(current_chunk.strip())
+
+        return chunks
+
     async def send_as_persona(
         self,
         channel: discord.TextChannel,
@@ -154,10 +204,8 @@ class WebhookManager:
                     f"Using avatar URL for {persona_config.name}: {persona_config.avatar_url}"
                 )
 
-            # Prepare the content with reply reference if needed
-            final_content = content
-            if reply_to:
-                final_content = f"Replying to {reply_to.author.mention}:\n\n{content}"
+            # Split content into chunks if needed
+            chunks = self._split_message(content)
 
             # Use aiohttp session for webhook execution
             async with aiohttp.ClientSession() as session:
@@ -165,27 +213,37 @@ class WebhookManager:
                     webhook.url, session=session
                 )
 
-                # Send the message via webhook
-                logger.debug(
-                    f"Sending webhook message as {persona_config.display_name} "
-                    f"with avatar URL: {persona_config.avatar_url or 'None (will use default)'}"
-                )
+                first_message = None
 
-                message = await webhook_with_session.send(
-                    content=final_content,
-                    username=persona_config.display_name,
-                    avatar_url=persona_config.avatar_url,
-                    wait=True,
-                    allowed_mentions=discord.AllowedMentions(replied_user=True)
-                    if reply_to
-                    else None,
-                )
+                # Send each chunk
+                for i, chunk in enumerate(chunks):
+                    # Only add reply prefix to first message
+                    final_content = chunk
+                    if i == 0 and reply_to:
+                        final_content = f"Replying to {reply_to.author.mention}:\n\n{chunk}"
+
+                    logger.debug(
+                        f"Sending webhook message chunk {i + 1}/{len(chunks)} as {persona_config.display_name}"
+                    )
+
+                    message = await webhook_with_session.send(
+                        content=final_content,
+                        username=persona_config.display_name,
+                        avatar_url=persona_config.avatar_url,
+                        wait=True,
+                        allowed_mentions=discord.AllowedMentions(replied_user=True)
+                        if reply_to
+                        else None,
+                    )
+
+                    if i == 0:
+                        first_message = message
 
                 logger.info(
-                    f"Successfully sent webhook message as {persona_config.display_name} "
-                    f"in channel {channel.id} (Message ID: {message.id})"
+                    f"Successfully sent {len(chunks)} webhook message(s) as {persona_config.display_name} "
+                    f"in channel {channel.id}"
                 )
-                return message
+                return first_message
 
         except Exception as e:
             logger.error(f"Error sending message as persona {persona_config.name}: {e}")
