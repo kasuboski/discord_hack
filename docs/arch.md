@@ -74,6 +74,7 @@ graph TD
 
 #### 3.5. Conversational Context Management
 *   **Responsibility:** Tracks ongoing discussions to enable stateful, context-aware routing for the Interjection feature. This is critical for handling low-information replies (e.g., "yes", "got it").
+  Embeddings: `SentenceTransformer('all-MiniLM-L6-v2')`
 *   **State Store:** An in-memory dictionary mapping a `conversation_id` to an object containing:
     *   `last_updated`: Timestamp for temporal decay.
     *   `topic_embedding`: The vector embedding of an LLM-generated summary of the conversation.
