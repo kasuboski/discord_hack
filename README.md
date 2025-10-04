@@ -1,8 +1,28 @@
 # AI Team Bot - Discord RAG Assistant
 
-The **AI Team Bot** is a multi-persona AI agent for Discord designed to assist software development teams. It leverages Retrieval-Augmented Generation (RAG) to provide contextually relevant answers from project-specific knowledge bases. The system features distinct AI "personas" (e.g., Project Manager, Lead Architect) that can be directly mentioned for targeted queries.
+The **AI Team Bot** is a multi-persona AI agent for Discord with this example designed for development teams. It leverages Retrieval-Augmented Generation (RAG) to provide contextually relevant answers from project-specific knowledge bases. The system features distinct AI "personas" (e.g., Project Manager, Lead Architect) that can be directly mentioned for targeted queries. The bot uses an LLM based router to automatically route queries to the appropriate persona along with relevant conversational context.
 
 Built with Python, discord.py, pydantic-ai, and powered by Meta Llama models via the Cerebras API.
+
+## 🤖 Features
+
+- **Multi-Persona Support**: Interact with a team of AI assistants, each with a unique personality, avatar, and knowledge base (e.g., `@JohnPM`, `@SarahArch`).
+- **Persona Mention Detection**: Mention a persona directly (`@PersonaName`) to get a targeted answer from their specific domain of expertise.
+- **Webhook-Based Impersonation**: Each persona responds with their own name and a unique, dynamically generated avatar.
+- **Persona-Specific RAG**: Each persona has an isolated knowledge base, ensuring domain-specific and contextually relevant answers.
+- **Dynamic Configuration**: Personas are defined and managed through `personas.json`, allowing for easy customization.
+- **General Bot Interaction**: Mention the bot by its name (`@AITeamBot`) for general questions.
+- **Proactive Interjections**: The bot will automatically interject with a personalized response based on the conversation context.
+
+## Usage
+
+### Interacting with the Bot
+
+- **General Question**: `@AITeamBot What is the project architecture?`
+- **Persona-Specific Question**: `@JohnPM how should we prioritize these features?`
+- **Empty Mention**: `@AITeamBot` (The bot will greet you)
+
+The bot will detect the mention and route the query to the appropriate agent.
 
 ## 🚀 Quick Start
 
@@ -38,24 +58,6 @@ Start the Discord bot:
 uv run src/main.py discord
 ```
 
-## 🤖 Features
-
-- **Multi-Persona Support**: Interact with a team of AI assistants, each with a unique personality, avatar, and knowledge base (e.g., `@JohnPM`, `@SarahArch`).
-- **Persona Mention Detection**: Mention a persona directly (`@PersonaName`) to get a targeted answer from their specific domain of expertise.
-- **Webhook-Based Impersonation**: Each persona responds with their own name and a unique, dynamically generated avatar.
-- **Persona-Specific RAG**: Each persona has an isolated knowledge base, ensuring domain-specific and contextually relevant answers.
-- **Dynamic Configuration**: Personas are defined and managed through `personas.json`, allowing for easy customization.
-- **General Bot Interaction**: Mention the bot by its name (`@AITeamBot`) for general questions.
-
-## Usage
-
-### Interacting with the Bot
-
-- **General Question**: `@AITeamBot What is the project architecture?`
-- **Persona-Specific Question**: `@JohnPM how should we prioritize these features?`
-- **Empty Mention**: `@AITeamBot` (The bot will greet you)
-
-The bot will detect the mention and route the query to the appropriate agent.
 
 ## Development
 
@@ -84,13 +86,6 @@ The bot's architecture is designed around a multi-persona, RAG-based system. For
 - **Knowledge Bases**: Text files in the `kbs/` directory, with each persona having its own dedicated knowledge source.
 
 ## Features
-
-### Core Functionality
-- Multi-persona AI team with distinct personalities and knowledge bases
-- Retrieval-Augmented Generation (RAG) for context-aware responses
-- Discord integration with mention detection and webhook responses
-- Conversation context tracking and intelligent routing
-- Proactive interjection based on conversation analysis
 
 ### Architecture
 - Modular agent system with caching for performance
