@@ -83,34 +83,21 @@ The bot's architecture is designed around a multi-persona, RAG-based system. For
 - **Webhook Manager** (`webhook_manager.py`): Handles the creation and caching of Discord webhooks for persona impersonation.
 - **Knowledge Bases**: Text files in the `kbs/` directory, with each persona having its own dedicated knowledge source.
 
-## 🚦 Development Phases
+## Features
 
-### ✅ Phase 1: Core RAG Engine
-- [x] Standalone AI agent with RAG capability
-- [x] Integration with Cerebras/Llama models
-- [x] Basic knowledge base retrieval
+### Core Functionality
+- Multi-persona AI team with distinct personalities and knowledge bases
+- Retrieval-Augmented Generation (RAG) for context-aware responses
+- Discord integration with mention detection and webhook responses
+- Conversation context tracking and intelligent routing
+- Proactive interjection based on conversation analysis
 
-### ✅ Phase 2: Discord @Mention Integration
-- [x] Discord.py bot with mention detection
-- [x] Message processing and query extraction
-- [x] Integration with existing RAG agent
-- [x] Error handling and logging
-
-### ✅ Phase 3: Multi-Persona Team & Dynamic RAG
-- [x] Multiple AI personas with distinct personalities and knowledge bases.
-- [x] Persona mention detection (`@PersonaName`).
-- [x] Discord webhooks for persona avatars and names.
-- [x] Configuration-driven persona management via `personas.json`.
-
-### 🔄 Phase 4: Context-Aware Interjection (Planned)
-- [ ] Conversation tracking and context management
-- [ ] Proactive interjection without mentions
-- [ ] Stateful conversation routing
-
-### 🔄 Phase 5: Polish & Deployment (Planned)
-- [ ] Docker containerization
-- [ ] Production deployment guides
-- [ ] Advanced error handling and monitoring
+### Architecture
+- Modular agent system with caching for performance
+- Configuration-driven persona management
+- Semantic conversation threading
+- Context-aware message routing
+- Robust error handling and logging
 
 ## 🔧 Configuration
 

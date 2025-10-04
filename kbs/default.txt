@@ -26,13 +26,13 @@ The bot is built with:
 - Vector-based RAG system for knowledge retrieval
 - Docker containerization for deployment
 
-## Implementation Phases
+## Key Features
 
-1. **Phase 1**: Core RAG Engine
-2. **Phase 2**: Discord @Mention Integration (Current)
-3. **Phase 3**: Multi-Persona Team & Dynamic RAG
-4. **Phase 4**: Dockerization & Context-Aware Interjection
-5. **Phase 5**: Polish, Documentation, and Submission
+- Multi-persona AI team with specialized knowledge bases
+- Intelligent conversation routing and context management
+- Proactive interjection with spam prevention
+- Discord webhook integration for persona impersonation
+- Retrieval-Augmented Generation for accurate responses
 
 ## Getting Started
 

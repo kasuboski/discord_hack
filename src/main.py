@@ -3,11 +3,13 @@
 import asyncio
 import sys
 
+from dotenv import load_dotenv
+
 from discord_hack.agent import get_agent
 from discord_hack.dependencies import Deps
 from discord_hack.discord_main import main as discord_main
 
-from dotenv import load_dotenv
+import logfire
 
 
 async def cli_main():
@@ -46,6 +48,9 @@ def main():
         sys.exit(1)
 
     _ = load_dotenv()
+
+    _ = logfire.configure(send_to_logfire="if-token-present")
+    logfire.instrument_pydantic_ai()
 
     if sys.argv[1] == "discord":
         # Remove 'discord' from args so discord_main can parse remaining args

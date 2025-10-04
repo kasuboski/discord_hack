@@ -1,0 +1,1045 @@
+# Router Conversation Routing Evaluation Dataset
+# Tests whether the router correctly identifies which conversation a message belongs to
+#
+# This dataset covers:
+# - Route to existing conversation: Message clearly continues an ongoing topic
+# - Create new conversation: Message starts a new topic
+# - Multiple interleaved conversations: Multiple topics in same channel
+# - Edge cases: Ambiguous routing, stale conversations
+
+cases:
+  # ===== Route to Existing Conversation Cases =====
+
+  - name: routing_clear_topic_match
+    inputs:
+      current_message:
+        id: "msg_6001"
+        content: "What about the migration strategy for existing data?"
+        author_name: "DevA"
+        author_id: "user_1"
+        timestamp: "2025-10-03T10:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_db_001"
+          channel_id: "channel_1"
+          created_at: "2025-10-03T10:00:00Z"
+          last_active: "2025-10-03T10:25:00Z"
+          topic_summary: "Database schema migration planning"
+          messages:
+            - id: "msg_6000"
+              content: "We need to migrate from MySQL to PostgreSQL"
+              author_name: "DevB"
+              author_id: "user_2"
+              timestamp: "2025-10-03T10:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_db_001"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_6000"]
+      confidence: 0.85
+      reasoning: "Migration question continues database migration conversation"
+      topic_summary: "Database schema migration planning"
+    metadata:
+      category: "conversation_routing"
+      subcategory: "existing_conversation"
+      difficulty: "easy"
+    evaluators:
+      - ConversationRoutingEvaluator
+      - ContextSelectionEvaluator
+
+  - name: routing_semantic_similarity
+    inputs:
+      current_message:
+        id: "msg_6010"
+        content: "Should we use JWT or session tokens for this?"
+        author_name: "DevB"
+        author_id: "user_2"
+        timestamp: "2025-10-03T11:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_auth_001"
+          channel_id: "channel_1"
+          created_at: "2025-10-03T11:00:00Z"
+          last_active: "2025-10-03T11:25:00Z"
+          topic_summary: "User authentication implementation"
+          messages:
+            - id: "msg_6005"
+              content: "How do we implement user login and authentication?"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-03T11:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_6006"
+              content: "Use OAuth2 with authorization code flow"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-03T11:15:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_auth_001"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_6005", "msg_6006"]
+      confidence: 0.8
+      reasoning: "Token type question relates to authentication conversation"
+      topic_summary: "User authentication implementation"
+    metadata:
+      category: "conversation_routing"
+      subcategory: "existing_conversation"
+      difficulty: "medium"
+    evaluators:
+      - ConversationRoutingEvaluator
+      - ContextSelectionEvaluator
+
+  - name: routing_callback_to_conversation
+    inputs:
+      current_message:
+        id: "msg_6020"
+        content: "Back to the API rate limiting, what thresholds should we set?"
+        author_name: "DevC"
+        author_id: "user_3"
+        timestamp: "2025-10-03T14:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_rate_001"
+          channel_id: "channel_1"
+          created_at: "2025-10-03T12:00:00Z"
+          last_active: "2025-10-03T12:30:00Z"
+          topic_summary: "API rate limiting strategy"
+          messages:
+            - id: "msg_6015"
+              content: "How should we implement rate limiting?"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-03T12:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_6016"
+              content: "Token bucket algorithm with Redis storage"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-03T12:15:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+        - id: "conv_other_001"
+          channel_id: "channel_1"
+          created_at: "2025-10-03T13:00:00Z"
+          last_active: "2025-10-03T13:55:00Z"
+          topic_summary: "Frontend UI design discussion"
+          messages:
+            - id: "msg_6017"
+              content: "What color scheme for the dashboard?"
+              author_name: "DevB"
+              author_id: "user_2"
+              timestamp: "2025-10-03T13:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_rate_001"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_6015", "msg_6016"]
+      confidence: 0.85
+      reasoning: "Explicit callback to rate limiting conversation"
+      topic_summary: "API rate limiting strategy"
+    metadata:
+      category: "conversation_routing"
+      subcategory: "existing_conversation"
+      difficulty: "medium"
+    evaluators:
+      - ConversationRoutingEvaluator
+      - ContextSelectionEvaluator
+
+  - name: routing_recent_activity
+    inputs:
+      current_message:
+        id: "msg_6030"
+        content: "What about error handling?"
+        author_name: "DevA"
+        author_id: "user_1"
+        timestamp: "2025-10-03T15:10:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_api_001"
+          channel_id: "channel_1"
+          created_at: "2025-10-03T15:00:00Z"
+          last_active: "2025-10-03T15:05:00Z"
+          topic_summary: "API endpoint implementation"
+          messages:
+            - id: "msg_6025"
+              content: "How to structure the user profile API endpoint?"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-03T15:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_6026"
+              content: "Use RESTful design with proper status codes"
+              author_name: "DevMike"
+              author_id: "bot_2"
+              timestamp: "2025-10-03T15:05:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "DevMike"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_api_001"
+      suggested_persona: "DevMike"
+      relevant_message_ids: ["msg_6025", "msg_6026"]
+      confidence: 0.8
+      reasoning: "Error handling is part of API implementation discussion"
+      topic_summary: "API endpoint implementation"
+    metadata:
+      category: "conversation_routing"
+      subcategory: "existing_conversation"
+      difficulty: "easy"
+    evaluators:
+      - ConversationRoutingEvaluator
+      - ContextSelectionEvaluator
+
+  - name: routing_reply_to_bot
+    inputs:
+      current_message:
+        id: "msg_6040"
+        content: "Can you explain that saga pattern more?"
+        author_name: "DevB"
+        author_id: "user_2"
+        timestamp: "2025-10-03T16:20:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: "msg_6036"
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_dist_001"
+          channel_id: "channel_1"
+          created_at: "2025-10-03T16:00:00Z"
+          last_active: "2025-10-03T16:15:00Z"
+          topic_summary: "Distributed transaction handling"
+          messages:
+            - id: "msg_6035"
+              content: "How to handle distributed transactions?"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-03T16:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_6036"
+              content: "Use saga pattern with compensating transactions"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-03T16:10:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_dist_001"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_6035", "msg_6036"]
+      confidence: 0.95
+      reasoning: "Direct reply to bot message in conversation"
+      topic_summary: "Distributed transaction handling"
+    metadata:
+      category: "conversation_routing"
+      subcategory: "existing_conversation"
+      difficulty: "easy"
+    evaluators:
+      - ConversationRoutingEvaluator
+      - ContextSelectionEvaluator
+
+  # ===== Create New Conversation Cases =====
+
+  - name: routing_new_unrelated_topic
+    inputs:
+      current_message:
+        id: "msg_6050"
+        content: "What's the best approach for implementing search functionality?"
+        author_name: "DevC"
+        author_id: "user_3"
+        timestamp: "2025-10-03T17:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_auth_002"
+          channel_id: "channel_1"
+          created_at: "2025-10-03T16:00:00Z"
+          last_active: "2025-10-03T16:55:00Z"
+          topic_summary: "Authentication system design"
+          messages:
+            - id: "msg_6045"
+              content: "How to implement OAuth2?"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-03T16:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "SarahArch"
+      relevant_message_ids: []
+      confidence: 0.8
+      reasoning: "Search is unrelated to authentication, starts new conversation"
+      topic_summary: "Search functionality implementation"
+    metadata:
+      category: "conversation_routing"
+      subcategory: "new_conversation"
+      difficulty: "easy"
+    evaluators:
+      - ConversationRoutingEvaluator
+      - ContextSelectionEvaluator
+
+  - name: routing_new_after_stale
+    inputs:
+      current_message:
+        id: "msg_6060"
+        content: "What caching strategy should we use?"
+        author_name: "DevA"
+        author_id: "user_1"
+        timestamp: "2025-10-04T10:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_cache_old"
+          channel_id: "channel_1"
+          created_at: "2025-10-03T09:00:00Z"
+          last_active: "2025-10-03T09:30:00Z"
+          topic_summary: "Caching implementation discussion"
+          messages:
+            - id: "msg_6055"
+              content: "Redis or Memcached?"
+              author_name: "DevB"
+              author_id: "user_2"
+              timestamp: "2025-10-03T09:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "SarahArch"
+      relevant_message_ids: []
+      confidence: 0.7
+      reasoning: "Caching topic but conversation is stale (24h+), start fresh"
+      topic_summary: "Caching strategy selection"
+    metadata:
+      category: "conversation_routing"
+      subcategory: "new_conversation"
+      difficulty: "medium"
+    evaluators:
+      - ConversationRoutingEvaluator
+      - ContextSelectionEvaluator
+
+  - name: routing_new_different_channel
+    inputs:
+      current_message:
+        id: "msg_6070"
+        content: "How do we deploy this to production?"
+        author_name: "DevB"
+        author_id: "user_2"
+        timestamp: "2025-10-04T11:00:00Z"
+        channel_id: "channel_2"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_deploy_chan1"
+          channel_id: "channel_1"
+          created_at: "2025-10-04T10:00:00Z"
+          last_active: "2025-10-04T10:55:00Z"
+          topic_summary: "Deployment pipeline setup"
+          messages:
+            - id: "msg_6065"
+              content: "Setting up CI/CD pipeline"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-04T10:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "DevMike"
+      relevant_message_ids: []
+      confidence: 0.75
+      reasoning: "Different channel, start new conversation even if topic similar"
+      topic_summary: "Production deployment process"
+    metadata:
+      category: "conversation_routing"
+      subcategory: "new_conversation"
+      difficulty: "easy"
+    evaluators:
+      - ConversationRoutingEvaluator
+      - ContextSelectionEvaluator
+
+  - name: routing_new_explicit_start
+    inputs:
+      current_message:
+        id: "msg_6080"
+        content: "New topic: how should we handle file uploads?"
+        author_name: "DevC"
+        author_id: "user_3"
+        timestamp: "2025-10-04T12:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_ongoing"
+          channel_id: "channel_1"
+          created_at: "2025-10-04T11:00:00Z"
+          last_active: "2025-10-04T11:55:00Z"
+          topic_summary: "Database optimization"
+          messages:
+            - id: "msg_6075"
+              content: "How to optimize database queries?"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-04T11:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "DevMike"
+      relevant_message_ids: []
+      confidence: 0.9
+      reasoning: "Explicit 'new topic' signal, create new conversation"
+      topic_summary: "File upload handling"
+    metadata:
+      category: "conversation_routing"
+      subcategory: "new_conversation"
+      difficulty: "easy"
+    evaluators:
+      - ConversationRoutingEvaluator
+      - ContextSelectionEvaluator
+
+  - name: routing_new_completely_different
+    inputs:
+      current_message:
+        id: "msg_6090"
+        content: "What testing framework should we use for the frontend?"
+        author_name: "DevA"
+        author_id: "user_1"
+        timestamp: "2025-10-04T13:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_backend"
+          channel_id: "channel_1"
+          created_at: "2025-10-04T12:00:00Z"
+          last_active: "2025-10-04T12:55:00Z"
+          topic_summary: "Backend API development"
+          messages:
+            - id: "msg_6085"
+              content: "REST API endpoint design"
+              author_name: "DevB"
+              author_id: "user_2"
+              timestamp: "2025-10-04T12:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "DevMike"
+      relevant_message_ids: []
+      confidence: 0.85
+      reasoning: "Frontend testing unrelated to backend API discussion"
+      topic_summary: "Frontend testing framework selection"
+    metadata:
+      category: "conversation_routing"
+      subcategory: "new_conversation"
+      difficulty: "easy"
+    evaluators:
+      - ConversationRoutingEvaluator
+      - ContextSelectionEvaluator
+
+  # ===== Multiple Interleaved Conversations Cases =====
+
+  - name: routing_interleaved_select_correct
+    inputs:
+      current_message:
+        id: "msg_6100"
+        content: "What about using indexes to speed up those queries?"
+        author_name: "DevB"
+        author_id: "user_2"
+        timestamp: "2025-10-04T14:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_db_perf"
+          channel_id: "channel_1"
+          created_at: "2025-10-04T14:00:00Z"
+          last_active: "2025-10-04T14:20:00Z"
+          topic_summary: "Database performance optimization"
+          messages:
+            - id: "msg_6095"
+              content: "Database queries are slow, how to optimize?"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-04T14:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+        - id: "conv_ui_design"
+          channel_id: "channel_1"
+          created_at: "2025-10-04T14:05:00Z"
+          last_active: "2025-10-04T14:25:00Z"
+          topic_summary: "UI component design"
+          messages:
+            - id: "msg_6096"
+              content: "What UI library should we use?"
+              author_name: "DevC"
+              author_id: "user_3"
+              timestamp: "2025-10-04T14:05:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_db_perf"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_6095"]
+      confidence: 0.85
+      reasoning: "Indexes relate to database performance, not UI design"
+      topic_summary: "Database performance optimization"
+    metadata:
+      category: "conversation_routing"
+      subcategory: "interleaved"
+      difficulty: "medium"
+    evaluators:
+      - ConversationRoutingEvaluator
+      - ContextSelectionEvaluator
+
+  - name: routing_interleaved_time_based
+    inputs:
+      current_message:
+        id: "msg_6110"
+        content: "Yes, that makes sense for the color scheme"
+        author_name: "DevC"
+        author_id: "user_3"
+        timestamp: "2025-10-04T15:10:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_security"
+          channel_id: "channel_1"
+          created_at: "2025-10-04T14:00:00Z"
+          last_active: "2025-10-04T14:45:00Z"
+          topic_summary: "Security audit discussion"
+          messages:
+            - id: "msg_6101"
+              content: "Security vulnerabilities to address"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-04T14:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+        - id: "conv_design"
+          channel_id: "channel_1"
+          created_at: "2025-10-04T15:00:00Z"
+          last_active: "2025-10-04T15:05:00Z"
+          topic_summary: "Dashboard color scheme design"
+          messages:
+            - id: "msg_6105"
+              content: "What colors for the dashboard?"
+              author_name: "DevB"
+              author_id: "user_2"
+              timestamp: "2025-10-04T15:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_6106"
+              content: "Use consistent brand colors with good contrast"
+              author_name: "JohnPM"
+              author_id: "bot_3"
+              timestamp: "2025-10-04T15:05:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "JohnPM"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_design"
+      suggested_persona: "JohnPM"
+      relevant_message_ids: ["msg_6105", "msg_6106"]
+      confidence: 0.9
+      reasoning: "Color scheme reference matches recent design conversation"
+      topic_summary: "Dashboard color scheme design"
+    metadata:
+      category: "conversation_routing"
+      subcategory: "interleaved"
+      difficulty: "medium"
+    evaluators:
+      - ConversationRoutingEvaluator
+      - ContextSelectionEvaluator
+
+  - name: routing_interleaved_three_topics
+    inputs:
+      current_message:
+        id: "msg_6120"
+        content: "What about the pagination approach for that API?"
+        author_name: "DevA"
+        author_id: "user_1"
+        timestamp: "2025-10-04T16:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_deploy"
+          channel_id: "channel_1"
+          created_at: "2025-10-04T16:00:00Z"
+          last_active: "2025-10-04T16:10:00Z"
+          topic_summary: "Deployment automation"
+          messages:
+            - id: "msg_6111"
+              content: "CI/CD pipeline setup"
+              author_name: "DevB"
+              author_id: "user_2"
+              timestamp: "2025-10-04T16:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+        - id: "conv_api_design"
+          channel_id: "channel_1"
+          created_at: "2025-10-04T16:05:00Z"
+          last_active: "2025-10-04T16:20:00Z"
+          topic_summary: "API endpoint design"
+          messages:
+            - id: "msg_6112"
+              content: "Designing user listing API endpoint"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-04T16:05:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_6113"
+              content: "Use cursor-based pagination for scalability"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-04T16:15:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+        - id: "conv_testing"
+          channel_id: "channel_1"
+          created_at: "2025-10-04T16:15:00Z"
+          last_active: "2025-10-04T16:25:00Z"
+          topic_summary: "Testing strategy"
+          messages:
+            - id: "msg_6114"
+              content: "Unit test coverage targets"
+              author_name: "DevC"
+              author_id: "user_3"
+              timestamp: "2025-10-04T16:15:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_api_design"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_6112", "msg_6113"]
+      confidence: 0.85
+      reasoning: "Pagination mentioned in API design conversation"
+      topic_summary: "API endpoint design"
+    metadata:
+      category: "conversation_routing"
+      subcategory: "interleaved"
+      difficulty: "hard"
+    evaluators:
+      - ConversationRoutingEvaluator
+      - ContextSelectionEvaluator
+
+  # ===== Edge Cases =====
+
+  - name: routing_ambiguous_topic
+    inputs:
+      current_message:
+        id: "msg_6130"
+        content: "What about performance?"
+        author_name: "DevB"
+        author_id: "user_2"
+        timestamp: "2025-10-04T17:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_db_002"
+          channel_id: "channel_1"
+          created_at: "2025-10-04T17:00:00Z"
+          last_active: "2025-10-04T17:20:00Z"
+          topic_summary: "Database query optimization"
+          messages:
+            - id: "msg_6125"
+              content: "Optimizing database queries"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-04T17:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+        - id: "conv_frontend_002"
+          channel_id: "channel_1"
+          created_at: "2025-10-04T17:10:00Z"
+          last_active: "2025-10-04T17:25:00Z"
+          topic_summary: "Frontend rendering optimization"
+          messages:
+            - id: "msg_6126"
+              content: "React component rendering is slow"
+              author_name: "DevC"
+              author_id: "user_3"
+              timestamp: "2025-10-04T17:10:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_frontend_002"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_6126"]
+      confidence: 0.6
+      reasoning: "Vague 'performance' question, route to most recent active conversation"
+      topic_summary: "Frontend rendering optimization"
+    metadata:
+      category: "conversation_routing"
+      subcategory: "edge_case"
+      difficulty: "hard"
+    evaluators:
+      - ConversationRoutingEvaluator
+      - ContextSelectionEvaluator
+
+  - name: routing_empty_history
+    inputs:
+      current_message:
+        id: "msg_6140"
+        content: "How should we architect the notification system?"
+        author_name: "DevA"
+        author_id: "user_1"
+        timestamp: "2025-10-04T18:00:00Z"
+        channel_id: "channel_3"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "SarahArch"
+      relevant_message_ids: []
+      confidence: 0.85
+      reasoning: "No active conversations, start new one"
+      topic_summary: "Notification system architecture"
+    metadata:
+      category: "conversation_routing"
+      subcategory: "edge_case"
+      difficulty: "easy"
+    evaluators:
+      - ConversationRoutingEvaluator
+      - ContextSelectionEvaluator

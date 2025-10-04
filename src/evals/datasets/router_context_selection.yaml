@@ -1,0 +1,1635 @@
+# Router Context Selection Evaluation Dataset
+# Tests whether the router correctly identifies relevant messages for conversation context
+#
+# This dataset covers:
+# - Topic continuity: Messages that continue the current topic
+# - Skip irrelevant messages: Messages that are off-topic or unrelated
+# - Callback to earlier discussion: References to previous parts of conversation
+# - Reply threading: Following reply chains
+# - Edge cases: Empty contexts, single messages, etc.
+
+cases:
+  # ===== Topic Continuity Cases =====
+
+  - name: context_simple_topic_continuation
+    inputs:
+      current_message:
+        id: "msg_5001"
+        content: "What database should we use for this?"
+        author_name: "DevA"
+        author_id: "user_1"
+        timestamp: "2025-10-01T10:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_1"
+          channel_id: "channel_1"
+          created_at: "2025-10-01T10:00:00Z"
+          last_active: "2025-10-01T10:29:00Z"
+          topic_summary: "Database selection discussion"
+          messages:
+            - id: "msg_5000"
+              content: "We need to store user data with complex relationships"
+              author_name: "DevB"
+              author_id: "user_2"
+              timestamp: "2025-10-01T10:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_1"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_5000"]
+      confidence: 0.8
+      reasoning: "Message continues database selection discussion"
+      topic_summary: "Database selection discussion"
+    metadata:
+      category: "context_selection"
+      subcategory: "topic_continuity"
+      difficulty: "easy"
+    evaluators:
+      - ContextSelectionEvaluator
+      - ConversationRoutingEvaluator
+
+  - name: context_multi_message_continuation
+    inputs:
+      current_message:
+        id: "msg_5010"
+        content: "So we're going with PostgreSQL then?"
+        author_name: "DevC"
+        author_id: "user_3"
+        timestamp: "2025-10-01T11:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_2"
+          channel_id: "channel_1"
+          created_at: "2025-10-01T10:30:00Z"
+          last_active: "2025-10-01T10:55:00Z"
+          topic_summary: "Database technology decision"
+          messages:
+            - id: "msg_5007"
+              content: "What about PostgreSQL vs MySQL?"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-01T10:30:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5008"
+              content: "PostgreSQL has better JSON support and ACID compliance"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-01T10:45:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5009"
+              content: "That makes sense for our use case"
+              author_name: "DevB"
+              author_id: "user_2"
+              timestamp: "2025-10-01T10:50:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_2"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_5007", "msg_5008", "msg_5009"]
+      confidence: 0.85
+      reasoning: "Confirming decision from multi-message discussion"
+      topic_summary: "Database technology decision"
+    metadata:
+      category: "context_selection"
+      subcategory: "topic_continuity"
+      difficulty: "easy"
+    evaluators:
+      - ContextSelectionEvaluator
+      - ConversationRoutingEvaluator
+
+  - name: context_gradual_topic_evolution
+    inputs:
+      current_message:
+        id: "msg_5020"
+        content: "How do we handle database migrations then?"
+        author_name: "DevA"
+        author_id: "user_1"
+        timestamp: "2025-10-01T12:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_3"
+          channel_id: "channel_1"
+          created_at: "2025-10-01T11:00:00Z"
+          last_active: "2025-10-01T11:55:00Z"
+          topic_summary: "Database schema design"
+          messages:
+            - id: "msg_5015"
+              content: "We need to design the user table schema"
+              author_name: "DevB"
+              author_id: "user_2"
+              timestamp: "2025-10-01T11:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5016"
+              content: "Include email, hashed password, and timestamps"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-01T11:15:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5017"
+              content: "What about the relationships to other tables?"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-01T11:30:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5018"
+              content: "Use foreign keys with CASCADE on delete for profiles"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-01T11:45:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_3"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_5015", "msg_5016", "msg_5017", "msg_5018"]
+      confidence: 0.8
+      reasoning: "Migrations are natural progression from schema design"
+      topic_summary: "Database schema design and migrations"
+    metadata:
+      category: "context_selection"
+      subcategory: "topic_continuity"
+      difficulty: "medium"
+    evaluators:
+      - ContextSelectionEvaluator
+      - ConversationRoutingEvaluator
+
+  - name: context_technical_deep_dive
+    inputs:
+      current_message:
+        id: "msg_5030"
+        content: "What about transaction isolation levels?"
+        author_name: "DevB"
+        author_id: "user_2"
+        timestamp: "2025-10-01T13:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_4"
+          channel_id: "channel_1"
+          created_at: "2025-10-01T13:00:00Z"
+          last_active: "2025-10-01T13:25:00Z"
+          topic_summary: "Database transaction handling"
+          messages:
+            - id: "msg_5025"
+              content: "How should we handle concurrent user updates?"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-01T13:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5026"
+              content: "Use database transactions with proper locking"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-01T13:15:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_4"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_5025", "msg_5026"]
+      confidence: 0.85
+      reasoning: "Isolation levels are technical detail of transaction discussion"
+      topic_summary: "Database transaction handling"
+    metadata:
+      category: "context_selection"
+      subcategory: "topic_continuity"
+      difficulty: "medium"
+    evaluators:
+      - ContextSelectionEvaluator
+      - ConversationRoutingEvaluator
+
+  - name: context_summary_reference
+    inputs:
+      current_message:
+        id: "msg_5040"
+        content: "Can you summarize what we decided?"
+        author_name: "DevC"
+        author_id: "user_3"
+        timestamp: "2025-10-01T14:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_5"
+          channel_id: "channel_1"
+          created_at: "2025-10-01T14:00:00Z"
+          last_active: "2025-10-01T14:25:00Z"
+          topic_summary: "API rate limiting strategy"
+          messages:
+            - id: "msg_5035"
+              content: "Should we use token bucket or sliding window for rate limiting?"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-01T14:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5036"
+              content: "Token bucket is more flexible for burst traffic"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-01T14:10:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5037"
+              content: "Should we store it in Redis?"
+              author_name: "DevB"
+              author_id: "user_2"
+              timestamp: "2025-10-01T14:15:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5038"
+              content: "Yes, Redis with TTL is perfect for this"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-01T14:20:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_5"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_5035", "msg_5036", "msg_5037", "msg_5038"]
+      confidence: 0.9
+      reasoning: "Summary requires all context from the discussion"
+      topic_summary: "API rate limiting strategy"
+    metadata:
+      category: "context_selection"
+      subcategory: "topic_continuity"
+      difficulty: "easy"
+    evaluators:
+      - ContextSelectionEvaluator
+      - ConversationRoutingEvaluator
+
+  # ===== Skip Irrelevant Messages Cases =====
+
+  - name: context_skip_unrelated_messages
+    inputs:
+      current_message:
+        id: "msg_5050"
+        content: "Back to the authentication flow, how do we handle refresh tokens?"
+        author_name: "DevA"
+        author_id: "user_1"
+        timestamp: "2025-10-01T15:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_6"
+          channel_id: "channel_1"
+          created_at: "2025-10-01T15:00:00Z"
+          last_active: "2025-10-01T15:25:00Z"
+          topic_summary: "Authentication flow design"
+          messages:
+            - id: "msg_5045"
+              content: "We need to implement OAuth2 for authentication"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-01T15:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5046"
+              content: "Anyone want coffee? Going to the kitchen"
+              author_name: "DevC"
+              author_id: "user_3"
+              timestamp: "2025-10-01T15:05:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5047"
+              content: "Use authorization code flow with PKCE"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-01T15:10:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5048"
+              content: "Yeah, I'll take one!"
+              author_name: "DevB"
+              author_id: "user_2"
+              timestamp: "2025-10-01T15:15:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_6"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_5045", "msg_5047"]
+      confidence: 0.85
+      reasoning: "Skip coffee-related messages, keep auth discussion"
+      topic_summary: "Authentication flow design"
+    metadata:
+      category: "context_selection"
+      subcategory: "skip_irrelevant"
+      difficulty: "medium"
+    evaluators:
+      - ContextSelectionEvaluator
+      - ConversationRoutingEvaluator
+
+  - name: context_skip_different_topic
+    inputs:
+      current_message:
+        id: "msg_5060"
+        content: "What pagination approach did we agree on?"
+        author_name: "DevB"
+        author_id: "user_2"
+        timestamp: "2025-10-01T16:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_7"
+          channel_id: "channel_1"
+          created_at: "2025-10-01T16:00:00Z"
+          last_active: "2025-10-01T16:25:00Z"
+          topic_summary: "API pagination strategy"
+          messages:
+            - id: "msg_5055"
+              content: "Should we use offset-based or cursor-based pagination?"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-01T16:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5056"
+              content: "Did anyone see the game last night?"
+              author_name: "DevC"
+              author_id: "user_3"
+              timestamp: "2025-10-01T16:05:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5057"
+              content: "Cursor-based is better for large datasets and prevents skipped records"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-01T16:10:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5058"
+              content: "Yeah, what a finish! Unbelievable!"
+              author_name: "DevB"
+              author_id: "user_2"
+              timestamp: "2025-10-01T16:15:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_7"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_5055", "msg_5057"]
+      confidence: 0.85
+      reasoning: "Skip sports discussion, focus on pagination topic"
+      topic_summary: "API pagination strategy"
+    metadata:
+      category: "context_selection"
+      subcategory: "skip_irrelevant"
+      difficulty: "easy"
+    evaluators:
+      - ContextSelectionEvaluator
+      - ConversationRoutingEvaluator
+
+  - name: context_skip_noise_messages
+    inputs:
+      current_message:
+        id: "msg_5070"
+        content: "So we're using WebSocket for real-time updates?"
+        author_name: "DevA"
+        author_id: "user_1"
+        timestamp: "2025-10-01T17:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_8"
+          channel_id: "channel_1"
+          created_at: "2025-10-01T17:00:00Z"
+          last_active: "2025-10-01T17:25:00Z"
+          topic_summary: "Real-time notification system"
+          messages:
+            - id: "msg_5065"
+              content: "How should we implement real-time notifications?"
+              author_name: "DevB"
+              author_id: "user_2"
+              timestamp: "2025-10-01T17:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5066"
+              content: "lol"
+              author_name: "DevC"
+              author_id: "user_3"
+              timestamp: "2025-10-01T17:05:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5067"
+              content: "WebSocket or Server-Sent Events depending on bidirectional needs"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-01T17:10:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5068"
+              content: "k"
+              author_name: "DevC"
+              author_id: "user_3"
+              timestamp: "2025-10-01T17:15:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_8"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_5065", "msg_5067"]
+      confidence: 0.8
+      reasoning: "Skip noise messages like 'lol' and 'k'"
+      topic_summary: "Real-time notification system"
+    metadata:
+      category: "context_selection"
+      subcategory: "skip_irrelevant"
+      difficulty: "easy"
+    evaluators:
+      - ContextSelectionEvaluator
+      - ConversationRoutingEvaluator
+
+  - name: context_skip_meta_discussion
+    inputs:
+      current_message:
+        id: "msg_5080"
+        content: "What validation rules should we enforce?"
+        author_name: "DevB"
+        author_id: "user_2"
+        timestamp: "2025-10-01T18:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_9"
+          channel_id: "channel_1"
+          created_at: "2025-10-01T18:00:00Z"
+          last_active: "2025-10-01T18:25:00Z"
+          topic_summary: "Input validation strategy"
+          messages:
+            - id: "msg_5075"
+              content: "We need input validation for the API"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-01T18:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5076"
+              content: "Can we move this to a separate channel?"
+              author_name: "DevC"
+              author_id: "user_3"
+              timestamp: "2025-10-01T18:05:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5077"
+              content: "Use Pydantic models for request validation"
+              author_name: "DevMike"
+              author_id: "bot_2"
+              timestamp: "2025-10-01T18:10:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "DevMike"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5078"
+              content: "Let's just continue here"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-01T18:15:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_9"
+      suggested_persona: "DevMike"
+      relevant_message_ids: ["msg_5075", "msg_5077"]
+      confidence: 0.8
+      reasoning: "Skip meta-discussion about channel, focus on validation"
+      topic_summary: "Input validation strategy"
+    metadata:
+      category: "context_selection"
+      subcategory: "skip_irrelevant"
+      difficulty: "medium"
+    evaluators:
+      - ContextSelectionEvaluator
+      - ConversationRoutingEvaluator
+
+  - name: context_skip_old_resolved_topic
+    inputs:
+      current_message:
+        id: "msg_5090"
+        content: "Are we still using Redis for caching?"
+        author_name: "DevC"
+        author_id: "user_3"
+        timestamp: "2025-10-01T19:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_10"
+          channel_id: "channel_1"
+          created_at: "2025-10-01T19:00:00Z"
+          last_active: "2025-10-01T19:25:00Z"
+          topic_summary: "Caching implementation"
+          messages:
+            - id: "msg_5085"
+              content: "Redis or Memcached for session caching?"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-01T19:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5086"
+              content: "Redis is better for our use case - persistence and data structures"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-01T19:10:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5087"
+              content: "Sounds good, Redis it is"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-01T19:15:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_10"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_5085", "msg_5086", "msg_5087"]
+      confidence: 0.75
+      reasoning: "Confirming previously decided topic"
+      topic_summary: "Caching implementation"
+    metadata:
+      category: "context_selection"
+      subcategory: "skip_irrelevant"
+      difficulty: "easy"
+    evaluators:
+      - ContextSelectionEvaluator
+      - ConversationRoutingEvaluator
+
+  # ===== Callback to Earlier Discussion Cases =====
+
+  - name: context_callback_explicit_reference
+    inputs:
+      current_message:
+        id: "msg_5100"
+        content: "Going back to the authentication discussion from earlier, what about session timeout?"
+        author_name: "DevA"
+        author_id: "user_1"
+        timestamp: "2025-10-02T10:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_11"
+          channel_id: "channel_1"
+          created_at: "2025-10-01T15:00:00Z"
+          last_active: "2025-10-02T09:55:00Z"
+          topic_summary: "Various technical discussions"
+          messages:
+            - id: "msg_5091"
+              content: "We need OAuth2 authentication"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-01T15:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5092"
+              content: "Use authorization code flow with PKCE"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-01T15:15:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5093"
+              content: "What about the UI design for login?"
+              author_name: "DevB"
+              author_id: "user_2"
+              timestamp: "2025-10-02T09:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5094"
+              content: "That's design team territory, let's focus on backend"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-02T09:05:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_11"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_5091", "msg_5092"]
+      confidence: 0.8
+      reasoning: "Explicit callback to earlier authentication discussion"
+      topic_summary: "Authentication flow design"
+    metadata:
+      category: "context_selection"
+      subcategory: "callback"
+      difficulty: "medium"
+    evaluators:
+      - ContextSelectionEvaluator
+      - ConversationRoutingEvaluator
+
+  - name: context_callback_implicit_reference
+    inputs:
+      current_message:
+        id: "msg_5110"
+        content: "About that database choice, what about backup strategy?"
+        author_name: "DevB"
+        author_id: "user_2"
+        timestamp: "2025-10-02T11:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_12"
+          channel_id: "channel_1"
+          created_at: "2025-10-01T10:00:00Z"
+          last_active: "2025-10-02T10:55:00Z"
+          topic_summary: "Mixed technical discussion"
+          messages:
+            - id: "msg_5101"
+              content: "PostgreSQL or MongoDB for user data?"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-01T10:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5102"
+              content: "PostgreSQL for ACID compliance"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-01T10:15:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5103"
+              content: "Anyone going to lunch?"
+              author_name: "DevC"
+              author_id: "user_3"
+              timestamp: "2025-10-02T10:30:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_12"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_5101", "msg_5102"]
+      confidence: 0.75
+      reasoning: "References 'that database choice' - callback to earlier discussion"
+      topic_summary: "Database selection and backup"
+    metadata:
+      category: "context_selection"
+      subcategory: "callback"
+      difficulty: "medium"
+    evaluators:
+      - ContextSelectionEvaluator
+      - ConversationRoutingEvaluator
+
+  - name: context_callback_by_topic
+    inputs:
+      current_message:
+        id: "msg_5120"
+        content: "What was the reason we chose cursor-based pagination again?"
+        author_name: "DevC"
+        author_id: "user_3"
+        timestamp: "2025-10-02T12:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_13"
+          channel_id: "channel_1"
+          created_at: "2025-10-01T16:00:00Z"
+          last_active: "2025-10-02T11:55:00Z"
+          topic_summary: "API design discussions"
+          messages:
+            - id: "msg_5111"
+              content: "Offset or cursor-based pagination?"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-01T16:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5112"
+              content: "Cursor-based prevents skipped records in large datasets"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-01T16:15:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5113"
+              content: "Makes sense"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-01T16:20:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_13"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_5111", "msg_5112"]
+      confidence: 0.85
+      reasoning: "Asking for rationale of previous decision"
+      topic_summary: "API pagination strategy"
+    metadata:
+      category: "context_selection"
+      subcategory: "callback"
+      difficulty: "easy"
+    evaluators:
+      - ContextSelectionEvaluator
+      - ConversationRoutingEvaluator
+
+  - name: context_callback_with_new_angle
+    inputs:
+      current_message:
+        id: "msg_5130"
+        content: "For the rate limiting we discussed, what about per-user vs per-IP?"
+        author_name: "DevA"
+        author_id: "user_1"
+        timestamp: "2025-10-02T13:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_14"
+          channel_id: "channel_1"
+          created_at: "2025-10-01T14:00:00Z"
+          last_active: "2025-10-02T12:55:00Z"
+          topic_summary: "API security"
+          messages:
+            - id: "msg_5121"
+              content: "How to implement rate limiting?"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-01T14:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5122"
+              content: "Token bucket with Redis storage"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-01T14:15:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_14"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_5121", "msg_5122"]
+      confidence: 0.8
+      reasoning: "New aspect of rate limiting discussion"
+      topic_summary: "API rate limiting strategy"
+    metadata:
+      category: "context_selection"
+      subcategory: "callback"
+      difficulty: "medium"
+    evaluators:
+      - ContextSelectionEvaluator
+      - ConversationRoutingEvaluator
+
+  - name: context_callback_hours_later
+    inputs:
+      current_message:
+        id: "msg_5140"
+        content: "Circling back to WebSockets - do we need heartbeat mechanism?"
+        author_name: "DevB"
+        author_id: "user_2"
+        timestamp: "2025-10-02T20:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_15"
+          channel_id: "channel_1"
+          created_at: "2025-10-01T17:00:00Z"
+          last_active: "2025-10-02T19:55:00Z"
+          topic_summary: "Real-time features"
+          messages:
+            - id: "msg_5131"
+              content: "Real-time notifications via WebSocket?"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-01T17:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5132"
+              content: "Yes, WebSocket for bidirectional communication"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-01T17:15:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_15"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_5131", "msg_5132"]
+      confidence: 0.8
+      reasoning: "Callback to WebSocket discussion with implementation detail"
+      topic_summary: "Real-time WebSocket implementation"
+    metadata:
+      category: "context_selection"
+      subcategory: "callback"
+      difficulty: "medium"
+    evaluators:
+      - ContextSelectionEvaluator
+      - ConversationRoutingEvaluator
+
+  # ===== Reply Threading Cases =====
+
+  - name: context_direct_reply
+    inputs:
+      current_message:
+        id: "msg_5150"
+        content: "What do you mean by eventual consistency?"
+        author_name: "DevB"
+        author_id: "user_2"
+        timestamp: "2025-10-02T14:15:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: "msg_5142"
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_16"
+          channel_id: "channel_1"
+          created_at: "2025-10-02T14:00:00Z"
+          last_active: "2025-10-02T14:10:00Z"
+          topic_summary: "Distributed systems design"
+          messages:
+            - id: "msg_5141"
+              content: "How do we handle distributed transactions?"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-02T14:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5142"
+              content: "Use saga pattern with eventual consistency"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-02T14:05:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_16"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_5141", "msg_5142"]
+      confidence: 0.9
+      reasoning: "Direct reply to bot message requires full context"
+      topic_summary: "Distributed systems design"
+    metadata:
+      category: "context_selection"
+      subcategory: "reply_threading"
+      difficulty: "easy"
+    evaluators:
+      - ContextSelectionEvaluator
+      - ConversationRoutingEvaluator
+
+  - name: context_reply_chain
+    inputs:
+      current_message:
+        id: "msg_5160"
+        content: "And what about rollback if saga fails?"
+        author_name: "DevA"
+        author_id: "user_1"
+        timestamp: "2025-10-02T14:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: "msg_5153"
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_17"
+          channel_id: "channel_1"
+          created_at: "2025-10-02T14:00:00Z"
+          last_active: "2025-10-02T14:25:00Z"
+          topic_summary: "Saga pattern details"
+          messages:
+            - id: "msg_5151"
+              content: "How does saga pattern work exactly?"
+              author_name: "DevB"
+              author_id: "user_2"
+              timestamp: "2025-10-02T14:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5152"
+              content: "Each service performs local transaction and publishes event"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-02T14:10:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5153"
+              content: "So it's like a chain of events?"
+              author_name: "DevA"
+              author_id: "user_1"
+              timestamp: "2025-10-02T14:15:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: "msg_5152"
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5154"
+              content: "Exactly, each step triggers the next"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-02T14:20:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: "msg_5153"
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_17"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_5151", "msg_5152", "msg_5153", "msg_5154"]
+      confidence: 0.85
+      reasoning: "Follow reply chain to understand full context"
+      topic_summary: "Saga pattern implementation"
+    metadata:
+      category: "context_selection"
+      subcategory: "reply_threading"
+      difficulty: "medium"
+    evaluators:
+      - ContextSelectionEvaluator
+      - ConversationRoutingEvaluator
+
+  # ===== Edge Cases =====
+
+  - name: context_empty_conversation
+    inputs:
+      current_message:
+        id: "msg_5170"
+        content: "What's the best way to structure our microservices?"
+        author_name: "DevA"
+        author_id: "user_1"
+        timestamp: "2025-10-02T15:00:00Z"
+        channel_id: "channel_2"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "SarahArch"
+      relevant_message_ids: []
+      confidence: 0.85
+      reasoning: "New conversation, no context needed"
+      topic_summary: "Microservices architecture structure"
+    metadata:
+      category: "context_selection"
+      subcategory: "edge_case"
+      difficulty: "easy"
+    evaluators:
+      - ContextSelectionEvaluator
+      - ConversationRoutingEvaluator
+
+  - name: context_single_message_history
+    inputs:
+      current_message:
+        id: "msg_5180"
+        content: "Can you elaborate on that?"
+        author_name: "DevB"
+        author_id: "user_2"
+        timestamp: "2025-10-02T15:30:00Z"
+        channel_id: "channel_2"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_18"
+          channel_id: "channel_2"
+          created_at: "2025-10-02T15:00:00Z"
+          last_active: "2025-10-02T15:25:00Z"
+          topic_summary: "Service boundaries"
+          messages:
+            - id: "msg_5171"
+              content: "Define service boundaries based on business capabilities"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-02T15:20:00Z"
+              channel_id: "channel_2"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_18"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_5171"]
+      confidence: 0.8
+      reasoning: "Vague follow-up needs previous message context"
+      topic_summary: "Service boundaries explanation"
+    metadata:
+      category: "context_selection"
+      subcategory: "edge_case"
+      difficulty: "medium"
+    evaluators:
+      - ContextSelectionEvaluator
+      - ConversationRoutingEvaluator
+
+  - name: context_all_messages_relevant
+    inputs:
+      current_message:
+        id: "msg_5190"
+        content: "So to summarize, what's our complete architecture?"
+        author_name: "DevC"
+        author_id: "user_3"
+        timestamp: "2025-10-02T16:00:00Z"
+        channel_id: "channel_2"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_19"
+          channel_id: "channel_2"
+          created_at: "2025-10-02T15:00:00Z"
+          last_active: "2025-10-02T15:55:00Z"
+          topic_summary: "Complete architecture overview"
+          messages:
+            - id: "msg_5181"
+              content: "PostgreSQL for main database"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-02T15:00:00Z"
+              channel_id: "channel_2"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5182"
+              content: "Redis for caching"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-02T15:15:00Z"
+              channel_id: "channel_2"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_5183"
+              content: "WebSocket for real-time"
+              author_name: "SarahArch"
+              author_id: "bot_1"
+              timestamp: "2025-10-02T15:30:00Z"
+              channel_id: "channel_2"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: "conv_19"
+      suggested_persona: "SarahArch"
+      relevant_message_ids: ["msg_5181", "msg_5182", "msg_5183"]
+      confidence: 0.9
+      reasoning: "Summary request needs all previous decisions"
+      topic_summary: "Complete architecture overview"
+    metadata:
+      category: "context_selection"
+      subcategory: "edge_case"
+      difficulty: "easy"
+    evaluators:
+      - ContextSelectionEvaluator
+      - ConversationRoutingEvaluator

@@ -1,0 +1,665 @@
+# Router Persona Selection Evaluation Dataset
+# Tests whether the router correctly suggests the appropriate persona based on message content
+#
+# This dataset covers:
+# - Project Management queries (JohnPM): timelines, planning, requirements
+# - Architecture queries (SarahArch): system design, patterns, technology choices
+# - Development queries (DevMike): implementation, debugging, code review
+# - Ambiguous cases: messages that could reasonably match multiple personas
+
+cases:
+  # ===== Project Management Cases (JohnPM) =====
+
+  - name: pm_timeline_direct
+    inputs:
+      current_message:
+        id: "msg_1001"
+        content: "What's the deadline for the Q1 release?"
+        author_name: "TestUser"
+        author_id: "user_123"
+        timestamp: "2025-10-01T10:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "JohnPM"
+      relevant_message_ids: []
+      confidence: 0.8
+      reasoning: "Timeline/deadline question is PM domain"
+      topic_summary: "Q1 release timeline inquiry"
+    metadata:
+      category: "project_management"
+      subcategory: "timeline"
+      difficulty: "easy"
+      expected_persona: "JohnPM"
+    evaluators:
+      - PersonaSuggestionEvaluator
+      - StructuredOutputEvaluator
+
+  - name: pm_sprint_planning
+    inputs:
+      current_message:
+        id: "msg_1002"
+        content: "Can we push this feature to the next sprint? We're running behind schedule."
+        author_name: "Developer1"
+        author_id: "user_456"
+        timestamp: "2025-10-01T11:15:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "JohnPM"
+      relevant_message_ids: []
+      confidence: 0.8
+      reasoning: "Sprint planning and scheduling decisions are PM responsibilities"
+      topic_summary: "Sprint rescheduling request"
+    metadata:
+      category: "project_management"
+      subcategory: "sprint_planning"
+      difficulty: "easy"
+      expected_persona: "JohnPM"
+    evaluators:
+      - PersonaSuggestionEvaluator
+      - StructuredOutputEvaluator
+
+  - name: pm_requirements_clarification
+    inputs:
+      current_message:
+        id: "msg_1003"
+        content: "What are the acceptance criteria for the user authentication feature?"
+        author_name: "TestUser"
+        author_id: "user_789"
+        timestamp: "2025-10-01T14:30:00Z"
+        channel_id: "channel_2"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "JohnPM"
+      relevant_message_ids: []
+      confidence: 0.8
+      reasoning: "Acceptance criteria and requirements are PM domain"
+      topic_summary: "Requirements clarification request"
+    metadata:
+      category: "project_management"
+      subcategory: "requirements"
+      difficulty: "easy"
+      expected_persona: "JohnPM"
+    evaluators:
+      - PersonaSuggestionEvaluator
+      - StructuredOutputEvaluator
+
+  - name: pm_stakeholder_update
+    inputs:
+      current_message:
+        id: "msg_1004"
+        content: "What should we tell the client about the delay in the dashboard feature?"
+        author_name: "Designer1"
+        author_id: "user_321"
+        timestamp: "2025-10-01T16:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "JohnPM"
+      relevant_message_ids: []
+      confidence: 0.85
+      reasoning: "Stakeholder communication and client updates are PM responsibilities"
+      topic_summary: "Client communication about delays"
+    metadata:
+      category: "project_management"
+      subcategory: "stakeholder_communication"
+      difficulty: "easy"
+      expected_persona: "JohnPM"
+    evaluators:
+      - PersonaSuggestionEvaluator
+      - StructuredOutputEvaluator
+
+  # ===== Architecture Cases (SarahArch) =====
+
+  - name: arch_microservices_vs_monolith
+    inputs:
+      current_message:
+        id: "msg_2001"
+        content: "Should we use microservices or a monolith architecture for this project?"
+        author_name: "TechLead"
+        author_id: "user_111"
+        timestamp: "2025-10-01T09:00:00Z"
+        channel_id: "channel_3"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "SarahArch"
+      relevant_message_ids: []
+      confidence: 0.9
+      reasoning: "Architectural pattern decisions are architect domain"
+      topic_summary: "Architecture pattern selection"
+    metadata:
+      category: "architecture"
+      subcategory: "system_design"
+      difficulty: "easy"
+      expected_persona: "SarahArch"
+    evaluators:
+      - PersonaSuggestionEvaluator
+      - StructuredOutputEvaluator
+
+  - name: arch_authentication_pattern
+    inputs:
+      current_message:
+        id: "msg_2002"
+        content: "What's the best way to handle authentication and authorization across our services? Should we use OAuth2 or JWT?"
+        author_name: "Developer2"
+        author_id: "user_222"
+        timestamp: "2025-10-01T10:30:00Z"
+        channel_id: "channel_3"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "SarahArch"
+      relevant_message_ids: []
+      confidence: 0.85
+      reasoning: "Authentication patterns and security architecture are architect domain"
+      topic_summary: "Authentication architecture design"
+    metadata:
+      category: "architecture"
+      subcategory: "security_patterns"
+      difficulty: "easy"
+      expected_persona: "SarahArch"
+    evaluators:
+      - PersonaSuggestionEvaluator
+      - StructuredOutputEvaluator
+
+  - name: arch_database_choice
+    inputs:
+      current_message:
+        id: "msg_2003"
+        content: "Should we use PostgreSQL or MongoDB for our user data? We need ACID transactions but also flexible schemas."
+        author_name: "Backend Dev"
+        author_id: "user_333"
+        timestamp: "2025-10-01T13:00:00Z"
+        channel_id: "channel_2"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "SarahArch"
+      relevant_message_ids: []
+      confidence: 0.85
+      reasoning: "Database technology selection involves architectural trade-offs"
+      topic_summary: "Database technology selection"
+    metadata:
+      category: "architecture"
+      subcategory: "technology_choice"
+      difficulty: "easy"
+      expected_persona: "SarahArch"
+    evaluators:
+      - PersonaSuggestionEvaluator
+      - StructuredOutputEvaluator
+
+  - name: arch_caching_strategy
+    inputs:
+      current_message:
+        id: "msg_2004"
+        content: "How should we design our caching layer? Redis vs Memcached? And where should the cache sit in our architecture?"
+        author_name: "TechLead"
+        author_id: "user_444"
+        timestamp: "2025-10-01T15:45:00Z"
+        channel_id: "channel_3"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "SarahArch"
+      relevant_message_ids: []
+      confidence: 0.85
+      reasoning: "Caching architecture and technology choice are architect decisions"
+      topic_summary: "Caching layer design"
+    metadata:
+      category: "architecture"
+      subcategory: "infrastructure_design"
+      difficulty: "easy"
+      expected_persona: "SarahArch"
+    evaluators:
+      - PersonaSuggestionEvaluator
+      - StructuredOutputEvaluator
+
+  # ===== Development Cases (DevMike) =====
+
+  - name: dev_async_debugging
+    inputs:
+      current_message:
+        id: "msg_3001"
+        content: "Why is this async function not awaiting properly? I keep getting 'coroutine was never awaited' errors."
+        author_name: "Junior Dev"
+        author_id: "user_555"
+        timestamp: "2025-10-01T11:00:00Z"
+        channel_id: "channel_4"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "DevMike"
+      relevant_message_ids: []
+      confidence: 0.9
+      reasoning: "Debugging async/await issues is a development task"
+      topic_summary: "Async/await debugging help"
+    metadata:
+      category: "development"
+      subcategory: "debugging"
+      difficulty: "easy"
+      expected_persona: "DevMike"
+    evaluators:
+      - PersonaSuggestionEvaluator
+      - StructuredOutputEvaluator
+
+  - name: dev_code_review
+    inputs:
+      current_message:
+        id: "msg_3002"
+        content: "Can someone review this pull request? I've implemented the user profile update endpoint."
+        author_name: "Developer3"
+        author_id: "user_666"
+        timestamp: "2025-10-01T12:30:00Z"
+        channel_id: "channel_4"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "DevMike"
+      relevant_message_ids: []
+      confidence: 0.85
+      reasoning: "Code review is a development task"
+      topic_summary: "Code review request"
+    metadata:
+      category: "development"
+      subcategory: "code_review"
+      difficulty: "easy"
+      expected_persona: "DevMike"
+    evaluators:
+      - PersonaSuggestionEvaluator
+      - StructuredOutputEvaluator
+
+  - name: dev_test_failure
+    inputs:
+      current_message:
+        id: "msg_3003"
+        content: "The integration tests keep failing with a 500 error when we try to create a user. Help!"
+        author_name: "QA Tester"
+        author_id: "user_777"
+        timestamp: "2025-10-01T14:00:00Z"
+        channel_id: "channel_4"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "DevMike"
+      relevant_message_ids: []
+      confidence: 0.85
+      reasoning: "Test failures and debugging are development tasks"
+      topic_summary: "Integration test debugging"
+    metadata:
+      category: "development"
+      subcategory: "testing"
+      difficulty: "easy"
+      expected_persona: "DevMike"
+    evaluators:
+      - PersonaSuggestionEvaluator
+      - StructuredOutputEvaluator
+
+  - name: dev_implementation_guidance
+    inputs:
+      current_message:
+        id: "msg_3004"
+        content: "What's the best way to implement rate limiting in our API? Should I use a decorator or middleware?"
+        author_name: "Backend Dev"
+        author_id: "user_888"
+        timestamp: "2025-10-01T16:30:00Z"
+        channel_id: "channel_4"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "DevMike"
+      relevant_message_ids: []
+      confidence: 0.8
+      reasoning: "Implementation approach questions are development tasks"
+      topic_summary: "Rate limiting implementation"
+    metadata:
+      category: "development"
+      subcategory: "implementation"
+      difficulty: "easy"
+      expected_persona: "DevMike"
+    evaluators:
+      - PersonaSuggestionEvaluator
+      - StructuredOutputEvaluator
+
+  # ===== Ambiguous Cases =====
+
+  - name: ambiguous_timeline_and_implementation
+    inputs:
+      current_message:
+        id: "msg_4001"
+        content: "How long will it take to implement the authentication system with OAuth and user profiles?"
+        author_name: "ProductOwner"
+        author_id: "user_999"
+        timestamp: "2025-10-01T13:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "JohnPM"
+      relevant_message_ids: []
+      confidence: 0.65
+      reasoning: "Timeline estimation could be PM or Dev, but PM typically handles estimates"
+      topic_summary: "Implementation timeline estimation"
+    metadata:
+      category: "ambiguous"
+      subcategory: "timeline_implementation"
+      difficulty: "medium"
+      expected_persona: "JohnPM"
+      acceptable_personas: ["JohnPM", "DevMike"]
+    evaluators:
+      - PersonaSuggestionEvaluator
+      - StructuredOutputEvaluator
+
+  - name: ambiguous_technical_and_business
+    inputs:
+      current_message:
+        id: "msg_4002"
+        content: "What's our scalability strategy? Do we need to support 10k concurrent users by Q2?"
+        author_name: "CTO"
+        author_id: "user_1010"
+        timestamp: "2025-10-01T15:00:00Z"
+        channel_id: "channel_3"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "SarahArch"
+      relevant_message_ids: []
+      confidence: 0.7
+      reasoning: "Scalability strategy is primarily architectural but has PM timeline aspects"
+      topic_summary: "Scalability planning"
+    metadata:
+      category: "ambiguous"
+      subcategory: "scalability_planning"
+      difficulty: "medium"
+      expected_persona: "SarahArch"
+      acceptable_personas: ["SarahArch", "JohnPM"]
+    evaluators:
+      - PersonaSuggestionEvaluator
+      - StructuredOutputEvaluator
+
+  - name: ambiguous_very_short_question
+    inputs:
+      current_message:
+        id: "msg_4003"
+        content: "Status?"
+        author_name: "Manager"
+        author_id: "user_1111"
+        timestamp: "2025-10-01T17:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "JohnPM"
+      relevant_message_ids: []
+      confidence: 0.6
+      reasoning: "Status updates typically handled by PM, but very vague question"
+      topic_summary: "Status update request"
+    metadata:
+      category: "ambiguous"
+      subcategory: "vague_question"
+      difficulty: "hard"
+      expected_persona: "JohnPM"
+      acceptable_personas: ["JohnPM", "SarahArch", "DevMike"]
+    evaluators:
+      - PersonaSuggestionEvaluator
+      - StructuredOutputEvaluator

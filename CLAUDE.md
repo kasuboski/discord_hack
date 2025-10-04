@@ -43,7 +43,7 @@ This is a multi-persona Discord AI bot with Retrieval-Augmented Generation (RAG)
 - `retrieve` tool reads entire knowledge base file for context
 - Knowledge bases are text files in `kbs/` mapped to personas in `personas.json`
 
-**Conversation Context System** (Phase 4, new):
+**Conversation Context System**:
 - `context/` module tracks conversation threads using embeddings
 - `ConversationManager` routes messages to existing conversations via semantic similarity
 - Uses sentence-transformers (all-MiniLM-L6-v2 model) for message embeddings

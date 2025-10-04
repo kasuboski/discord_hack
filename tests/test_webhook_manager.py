@@ -1,7 +1,5 @@
 """Tests for webhook manager message splitting."""
 
-import pytest
-
 from discord_hack.webhook_manager import WebhookManager
 
 
@@ -40,9 +38,10 @@ class TestMessageSplitting:
         for chunk in chunks:
             assert len(chunk) <= 2000
         # Verify all content is preserved
-        assert "".join(chunks).replace("\n", "").strip() == content.replace(
-            "\n", ""
-        ).strip()
+        assert (
+            "".join(chunks).replace("\n", "").strip()
+            == content.replace("\n", "").strip()
+        )
 
     def test_split_message_preserves_line_breaks(self):
         """Test that line breaks are preserved during splitting."""
@@ -84,14 +83,17 @@ class TestMessageSplitting:
         """Test splitting markdown-style content with code blocks."""
         manager = WebhookManager()
         # Simulate a long technical response
-        content = """Here's how to do it:
+        content = (
+            """Here's how to do it:
 
 ```python
 def example():
     pass
 ```
 
-""" * 40  # ~2400 chars, will need splitting
+"""
+            * 40
+        )  # ~2400 chars, will need splitting
 
         chunks = manager._split_message(content)
 

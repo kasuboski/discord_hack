@@ -1,0 +1,425 @@
+# Router Structured Output Validation Dataset
+# Tests whether the router always returns valid, well-formed RouterDecision objects
+#
+# This dataset focuses on OUTPUT VALIDITY, not content correctness:
+# - All fields are present and have correct types
+# - Confidence is between 0.0 and 1.0
+# - Message IDs reference messages that exist in the conversation
+# - Persona names match available personas
+# - Conversation IDs match active conversations (or are null)
+# - Reasoning field is non-empty
+# - should_respond logic is correct when bot is mentioned
+
+cases:
+  # ===== Valid Output Cases =====
+
+  - name: valid_output_simple_case
+    inputs:
+      current_message:
+        id: "msg_100"
+        content: "What's the project timeline?"
+        author_name: "TestUser"
+        author_id: "user_123"
+        timestamp: "2025-10-01T10:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output: null  # We don't care about content, just structure
+    metadata:
+      scenario: "simple_valid_case"
+      test_focus: "Basic structure validation"
+    evaluators:
+      - StructuredOutputEvaluator
+
+  - name: valid_output_with_conversation_context
+    inputs:
+      current_message:
+        id: "msg_105"
+        content: "Can you elaborate on that database design?"
+        author_name: "TestUser"
+        author_id: "user_123"
+        timestamp: "2025-10-01T10:05:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: "msg_103"
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_1"
+          channel_id: "channel_1"
+          created_at: "2025-10-01T09:00:00Z"
+          last_active: "2025-10-01T10:00:00Z"
+          messages:
+            - id: "msg_101"
+              content: "We need to design the database schema"
+              author_name: "Developer1"
+              author_id: "user_456"
+              timestamp: "2025-10-01T09:00:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_102"
+              content: "Should we use PostgreSQL or MySQL?"
+              author_name: "Developer2"
+              author_id: "user_789"
+              timestamp: "2025-10-01T09:30:00Z"
+              channel_id: "channel_1"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_103"
+              content: "I recommend PostgreSQL for ACID compliance and JSON support"
+              author_name: "Sarah Chen"
+              author_id: "bot_123"
+              timestamp: "2025-10-01T09:45:00Z"
+              channel_id: "channel_1"
+              is_bot: true
+              persona_name: "SarahArch"
+              reply_to_id: "msg_102"
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+          topic_summary: "Database design discussion"
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output: null
+    metadata:
+      scenario: "valid_with_context"
+      test_focus: "Message ID validity - all selected IDs must exist"
+    evaluators:
+      - StructuredOutputEvaluator
+
+  - name: valid_output_no_relevant_context
+    inputs:
+      current_message:
+        id: "msg_200"
+        content: "What's the difference between REST and GraphQL?"
+        author_name: "Junior Dev"
+        author_id: "user_999"
+        timestamp: "2025-10-01T14:00:00Z"
+        channel_id: "channel_2"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations:
+        - id: "conv_2"
+          channel_id: "channel_2"
+          created_at: "2025-10-01T13:00:00Z"
+          last_active: "2025-10-01T13:30:00Z"
+          messages:
+            - id: "msg_201"
+              content: "Anyone want to grab lunch?"
+              author_name: "Developer3"
+              author_id: "user_888"
+              timestamp: "2025-10-01T13:00:00Z"
+              channel_id: "channel_2"
+              is_bot: false
+              persona_name: null
+              reply_to_id: null
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+            - id: "msg_202"
+              content: "Sure, pizza?"
+              author_name: "Developer4"
+              author_id: "user_777"
+              timestamp: "2025-10-01T13:15:00Z"
+              channel_id: "channel_2"
+              is_bot: false
+              persona_name: null
+              reply_to_id: "msg_201"
+              mentions_user_ids: []
+              has_attachments: false
+              attachment_types: []
+              has_embeds: false
+          topic_summary: "Lunch plans"
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output: null
+    metadata:
+      scenario: "no_relevant_context"
+      test_focus: "Empty relevant_message_ids list is valid"
+    evaluators:
+      - StructuredOutputEvaluator
+
+  # ===== Edge Cases =====
+
+  - name: edge_case_empty_conversations
+    inputs:
+      current_message:
+        id: "msg_300"
+        content: "How should we handle user permissions?"
+        author_name: "TestUser"
+        author_id: "user_123"
+        timestamp: "2025-10-01T10:00:00Z"
+        channel_id: "channel_3"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output: null
+    metadata:
+      scenario: "empty_conversations"
+      test_focus: "Handle empty active_conversations list"
+    evaluators:
+      - StructuredOutputEvaluator
+
+  - name: edge_case_very_short_message
+    inputs:
+      current_message:
+        id: "msg_400"
+        content: "?"
+        author_name: "Confused User"
+        author_id: "user_456"
+        timestamp: "2025-10-01T11:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output: null
+    metadata:
+      scenario: "very_short_message"
+      test_focus: "Handle minimal content gracefully"
+    evaluators:
+      - StructuredOutputEvaluator
+
+  - name: edge_case_very_long_message
+    inputs:
+      current_message:
+        id: "msg_500"
+        content: "I have a complex question about our architecture. We're currently using a monolithic application with PostgreSQL as our primary database, but we're experiencing scaling issues with our user authentication system. The current implementation uses session-based authentication with Redis for session storage, but we're seeing high latency during peak hours when we have thousands of concurrent users. I'm wondering if we should migrate to a microservices architecture with OAuth2 authentication, possibly using JWT tokens instead of sessions. However, I'm concerned about the complexity this would introduce, especially around distributed transactions and maintaining data consistency across services. What would be your recommendation for handling this situation? Should we stick with our current monolith and optimize it, or is now the right time to split into microservices? And if we go the microservices route, how should we handle the authentication and authorization across different services?"
+        author_name: "Architect"
+        author_id: "user_789"
+        timestamp: "2025-10-01T12:00:00Z"
+        channel_id: "channel_3"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output: null
+    metadata:
+      scenario: "very_long_message"
+      test_focus: "Handle lengthy content with multiple topics"
+    evaluators:
+      - StructuredOutputEvaluator
+
+  - name: edge_case_message_with_attachments
+    inputs:
+      current_message:
+        id: "msg_600"
+        content: "Here's the architecture diagram I mentioned. What do you think?"
+        author_name: "Designer"
+        author_id: "user_321"
+        timestamp: "2025-10-01T13:00:00Z"
+        channel_id: "channel_3"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: true
+        attachment_types: ["image/png"]
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output: null
+    metadata:
+      scenario: "message_with_attachments"
+      test_focus: "Handle messages with attachments"
+    evaluators:
+      - StructuredOutputEvaluator
+
+  - name: edge_case_explicit_persona_mention
+    inputs:
+      current_message:
+        id: "msg_700"
+        content: "@SarahArch what's your opinion on this microservices approach?"
+        author_name: "Developer"
+        author_id: "user_555"
+        timestamp: "2025-10-01T14:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: "SarahArch"
+      is_bot_mentioned: true
+    expected_output: null
+    metadata:
+      scenario: "explicit_persona"
+      test_focus: "Handle explicit persona mentions - should suggest that persona"
+    evaluators:
+      - StructuredOutputEvaluator
+
+  # ===== Confidence Bounds Testing =====
+
+  - name: confidence_bounds_clear_case
+    inputs:
+      current_message:
+        id: "msg_800"
+        content: "What's the Q2 deadline?"
+        author_name: "Manager"
+        author_id: "user_111"
+        timestamp: "2025-10-01T15:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output: null
+    metadata:
+      scenario: "clear_case_confidence"
+      test_focus: "Clear cases should have high confidence (>0.7)"
+    evaluators:
+      - StructuredOutputEvaluator
+
+  - name: confidence_bounds_ambiguous_case
+    inputs:
+      current_message:
+        id: "msg_900"
+        content: "How's everything going?"
+        author_name: "CEO"
+        author_id: "user_222"
+        timestamp: "2025-10-01T16:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+        - name: "SarahArch"
+          role: "Lead Architect"
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: null
+      is_bot_mentioned: true
+    expected_output: null
+    metadata:
+      scenario: "ambiguous_case_confidence"
+      test_focus: "Ambiguous cases should have lower confidence"
+    evaluators:
+      - StructuredOutputEvaluator

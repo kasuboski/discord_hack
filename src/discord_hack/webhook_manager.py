@@ -204,8 +204,14 @@ class WebhookManager:
                     f"Using avatar URL for {persona_config.name}: {persona_config.avatar_url}"
                 )
 
-            # Split content into chunks if needed
-            chunks = self._split_message(content)
+            # Prepare content with reply prefix if needed
+            final_content = content
+            if reply_to:
+                reply_prefix = f"Replying to {reply_to.author.mention}:\n\n"
+                final_content = reply_prefix + content
+
+            # Split content into chunks if needed (after adding reply prefix)
+            chunks = self._split_message(final_content)
 
             # Use aiohttp session for webhook execution
             async with aiohttp.ClientSession() as session:
@@ -217,23 +223,18 @@ class WebhookManager:
 
                 # Send each chunk
                 for i, chunk in enumerate(chunks):
-                    # Only add reply prefix to first message
-                    final_content = chunk
-                    if i == 0 and reply_to:
-                        final_content = f"Replying to {reply_to.author.mention}:\n\n{chunk}"
-
                     logger.debug(
                         f"Sending webhook message chunk {i + 1}/{len(chunks)} as {persona_config.display_name}"
                     )
 
                     message = await webhook_with_session.send(
-                        content=final_content,
+                        content=chunk,
                         username=persona_config.display_name,
                         avatar_url=persona_config.avatar_url,
                         wait=True,
                         allowed_mentions=discord.AllowedMentions(replied_user=True)
-                        if reply_to
-                        else None,
+                        if reply_to and i == 0
+                        else discord.AllowedMentions.none(),
                     )
 
                     if i == 0:

@@ -1,0 +1,582 @@
+# Router Response Format Evaluation Dataset
+# Tests whether persona responses follow expected format, stay grounded in knowledge base, and handle unknowns properly
+#
+# This dataset covers:
+# - Format validation per persona: Responses match persona personality/style
+# - Knowledge base grounding: Answers come from persona's knowledge base
+# - Unknown question handling: Graceful responses when info not in KB
+
+cases:
+  # ===== JohnPM Format Validation Cases =====
+
+  - name: format_johnpm_timeline_response
+    inputs:
+      current_message:
+        id: "msg_7001"
+        content: "What's the timeline for the authentication feature?"
+        author_name: "DevA"
+        author_id: "user_1"
+        timestamp: "2025-10-05T10:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+      explicit_persona: "JohnPM"
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "JohnPM"
+      relevant_message_ids: []
+      confidence: 0.9
+      reasoning: "Timeline question for project manager"
+      topic_summary: "Authentication feature timeline"
+    metadata:
+      category: "response_format"
+      subcategory: "persona_format"
+      persona: "JohnPM"
+      expected_traits: ["business-focused", "timeline-oriented", "clear communication"]
+    evaluators:
+      - PersonaResponseFormatEvaluator
+
+  - name: format_johnpm_requirements_response
+    inputs:
+      current_message:
+        id: "msg_7002"
+        content: "What are the acceptance criteria for user registration?"
+        author_name: "DevB"
+        author_id: "user_2"
+        timestamp: "2025-10-05T10:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+      explicit_persona: "JohnPM"
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "JohnPM"
+      relevant_message_ids: []
+      confidence: 0.9
+      reasoning: "Requirements question for PM"
+      topic_summary: "User registration acceptance criteria"
+    metadata:
+      category: "response_format"
+      subcategory: "persona_format"
+      persona: "JohnPM"
+      expected_traits: ["structured", "requirements-focused", "actionable"]
+    evaluators:
+      - PersonaResponseFormatEvaluator
+
+  - name: format_johnpm_stakeholder_response
+    inputs:
+      current_message:
+        id: "msg_7003"
+        content: "How do we communicate the delay to stakeholders?"
+        author_name: "DevC"
+        author_id: "user_3"
+        timestamp: "2025-10-05T11:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+      explicit_persona: "JohnPM"
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "JohnPM"
+      relevant_message_ids: []
+      confidence: 0.9
+      reasoning: "Stakeholder communication is PM responsibility"
+      topic_summary: "Stakeholder communication strategy"
+    metadata:
+      category: "response_format"
+      subcategory: "persona_format"
+      persona: "JohnPM"
+      expected_traits: ["diplomatic", "solution-oriented", "transparent"]
+    evaluators:
+      - PersonaResponseFormatEvaluator
+
+  # ===== SarahArch Format Validation Cases =====
+
+  - name: format_saraharch_architecture_response
+    inputs:
+      current_message:
+        id: "msg_7010"
+        content: "Should we use microservices or monolith?"
+        author_name: "DevA"
+        author_id: "user_1"
+        timestamp: "2025-10-05T11:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: "SarahArch"
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "SarahArch"
+      relevant_message_ids: []
+      confidence: 0.95
+      reasoning: "Architecture pattern decision"
+      topic_summary: "Architecture pattern selection"
+    metadata:
+      category: "response_format"
+      subcategory: "persona_format"
+      persona: "SarahArch"
+      expected_traits: ["technical-depth", "trade-off-analysis", "systems-thinking"]
+    evaluators:
+      - PersonaResponseFormatEvaluator
+
+  - name: format_saraharch_database_response
+    inputs:
+      current_message:
+        id: "msg_7011"
+        content: "PostgreSQL or MongoDB for user data?"
+        author_name: "DevB"
+        author_id: "user_2"
+        timestamp: "2025-10-05T12:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: "SarahArch"
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "SarahArch"
+      relevant_message_ids: []
+      confidence: 0.9
+      reasoning: "Database technology decision"
+      topic_summary: "Database technology selection"
+    metadata:
+      category: "response_format"
+      subcategory: "persona_format"
+      persona: "SarahArch"
+      expected_traits: ["data-model-focused", "scalability-aware", "use-case-driven"]
+    evaluators:
+      - PersonaResponseFormatEvaluator
+
+  - name: format_saraharch_scalability_response
+    inputs:
+      current_message:
+        id: "msg_7012"
+        content: "How do we scale to 100k concurrent users?"
+        author_name: "DevC"
+        author_id: "user_3"
+        timestamp: "2025-10-05T12:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: "SarahArch"
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "SarahArch"
+      relevant_message_ids: []
+      confidence: 0.95
+      reasoning: "Scalability is core architecture concern"
+      topic_summary: "System scalability planning"
+    metadata:
+      category: "response_format"
+      subcategory: "persona_format"
+      persona: "SarahArch"
+      expected_traits: ["performance-focused", "infrastructure-aware", "multi-layered-thinking"]
+    evaluators:
+      - PersonaResponseFormatEvaluator
+
+  # ===== DevMike Format Validation Cases =====
+
+  - name: format_devmike_debugging_response
+    inputs:
+      current_message:
+        id: "msg_7020"
+        content: "Why am I getting 'coroutine was never awaited' errors?"
+        author_name: "DevA"
+        author_id: "user_1"
+        timestamp: "2025-10-05T13:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: "DevMike"
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "DevMike"
+      relevant_message_ids: []
+      confidence: 0.9
+      reasoning: "Debugging async/await issue"
+      topic_summary: "Async/await debugging"
+    metadata:
+      category: "response_format"
+      subcategory: "persona_format"
+      persona: "DevMike"
+      expected_traits: ["code-focused", "practical-solutions", "debugging-oriented"]
+    evaluators:
+      - PersonaResponseFormatEvaluator
+
+  - name: format_devmike_implementation_response
+    inputs:
+      current_message:
+        id: "msg_7021"
+        content: "How do I implement rate limiting in the API?"
+        author_name: "DevB"
+        author_id: "user_2"
+        timestamp: "2025-10-05T13:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: "DevMike"
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "DevMike"
+      relevant_message_ids: []
+      confidence: 0.9
+      reasoning: "Implementation question for developer"
+      topic_summary: "Rate limiting implementation"
+    metadata:
+      category: "response_format"
+      subcategory: "persona_format"
+      persona: "DevMike"
+      expected_traits: ["implementation-details", "code-examples", "best-practices"]
+    evaluators:
+      - PersonaResponseFormatEvaluator
+
+  - name: format_devmike_testing_response
+    inputs:
+      current_message:
+        id: "msg_7022"
+        content: "Integration tests are failing with 500 errors, help!"
+        author_name: "DevC"
+        author_id: "user_3"
+        timestamp: "2025-10-05T14:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: "DevMike"
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "DevMike"
+      relevant_message_ids: []
+      confidence: 0.9
+      reasoning: "Test debugging question"
+      topic_summary: "Integration test debugging"
+    metadata:
+      category: "response_format"
+      subcategory: "persona_format"
+      persona: "DevMike"
+      expected_traits: ["troubleshooting", "systematic-approach", "testing-focused"]
+    evaluators:
+      - PersonaResponseFormatEvaluator
+
+  # ===== Knowledge Base Grounding Cases =====
+
+  - name: grounding_kb_specific_info
+    inputs:
+      current_message:
+        id: "msg_7030"
+        content: "What technologies are we using in this project?"
+        author_name: "DevA"
+        author_id: "user_1"
+        timestamp: "2025-10-05T14:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: "SarahArch"
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "SarahArch"
+      relevant_message_ids: []
+      confidence: 0.9
+      reasoning: "Project technology stack question"
+      topic_summary: "Project technology stack"
+    metadata:
+      category: "response_format"
+      subcategory: "kb_grounding"
+      expected_behavior: "Response should reference specific technologies from KB"
+    evaluators:
+      - PersonaResponseFormatEvaluator
+
+  - name: grounding_kb_project_specific
+    inputs:
+      current_message:
+        id: "msg_7031"
+        content: "What are the project milestones and deliverables?"
+        author_name: "DevB"
+        author_id: "user_2"
+        timestamp: "2025-10-05T15:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+      explicit_persona: "JohnPM"
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "JohnPM"
+      relevant_message_ids: []
+      confidence: 0.9
+      reasoning: "Project milestones question for PM"
+      topic_summary: "Project milestones"
+    metadata:
+      category: "response_format"
+      subcategory: "kb_grounding"
+      expected_behavior: "Response should cite specific milestones from KB"
+    evaluators:
+      - PersonaResponseFormatEvaluator
+
+  - name: grounding_kb_code_practices
+    inputs:
+      current_message:
+        id: "msg_7032"
+        content: "What coding standards should I follow?"
+        author_name: "DevC"
+        author_id: "user_3"
+        timestamp: "2025-10-05T15:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "DevMike"
+          role: "Senior Developer"
+      explicit_persona: "DevMike"
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "DevMike"
+      relevant_message_ids: []
+      confidence: 0.9
+      reasoning: "Coding standards question"
+      topic_summary: "Coding standards and practices"
+    metadata:
+      category: "response_format"
+      subcategory: "kb_grounding"
+      expected_behavior: "Response should reference project coding standards from KB"
+    evaluators:
+      - PersonaResponseFormatEvaluator
+
+  # ===== Unknown Question Handling Cases =====
+
+  - name: unknown_outside_domain
+    inputs:
+      current_message:
+        id: "msg_7040"
+        content: "What's the weather like today?"
+        author_name: "DevA"
+        author_id: "user_1"
+        timestamp: "2025-10-05T16:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+      explicit_persona: "JohnPM"
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "JohnPM"
+      relevant_message_ids: []
+      confidence: 0.5
+      reasoning: "Question outside project domain"
+      topic_summary: "Off-topic question"
+    metadata:
+      category: "response_format"
+      subcategory: "unknown_handling"
+      expected_behavior: "Polite response indicating question is outside expertise"
+    evaluators:
+      - PersonaResponseFormatEvaluator
+
+  - name: unknown_no_kb_info
+    inputs:
+      current_message:
+        id: "msg_7041"
+        content: "What's the budget for the marketing campaign?"
+        author_name: "DevB"
+        author_id: "user_2"
+        timestamp: "2025-10-05T16:30:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "JohnPM"
+          role: "Project Manager"
+      explicit_persona: "JohnPM"
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "JohnPM"
+      relevant_message_ids: []
+      confidence: 0.7
+      reasoning: "Question in PM domain but no KB info"
+      topic_summary: "Marketing budget inquiry"
+    metadata:
+      category: "response_format"
+      subcategory: "unknown_handling"
+      expected_behavior: "Acknowledge question but state info not available in KB"
+    evaluators:
+      - PersonaResponseFormatEvaluator
+
+  - name: unknown_ambiguous_context
+    inputs:
+      current_message:
+        id: "msg_7042"
+        content: "What do you think about it?"
+        author_name: "DevC"
+        author_id: "user_3"
+        timestamp: "2025-10-05T17:00:00Z"
+        channel_id: "channel_1"
+        is_bot: false
+        persona_name: null
+        reply_to_id: null
+        mentions_user_ids: []
+        has_attachments: false
+        attachment_types: []
+        has_embeds: false
+      active_conversations: []
+      available_personas:
+        - name: "SarahArch"
+          role: "Lead Architect"
+      explicit_persona: "SarahArch"
+      is_bot_mentioned: true
+    expected_output:
+      should_respond: true
+      conversation_id: null
+      suggested_persona: "SarahArch"
+      relevant_message_ids: []
+      confidence: 0.4
+      reasoning: "Completely ambiguous question"
+      topic_summary: "Ambiguous question"
+    metadata:
+      category: "response_format"
+      subcategory: "unknown_handling"
+      expected_behavior: "Request clarification about what 'it' refers to"
+    evaluators:
+      - PersonaResponseFormatEvaluator

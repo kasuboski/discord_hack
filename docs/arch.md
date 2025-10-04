@@ -4,9 +4,9 @@
 
 The **AI Team Bot** is a multi-persona AI agent for Discord designed to assist software development teams. It leverages Retrieval-Augmented Generation (RAG) to provide contextually relevant answers from a project-specific knowledge base. The system features distinct AI "personas" (e.g., Project Manager, Lead Architect) that can be directly mentioned for targeted queries.
 
-The bot's core innovation is its ability to proactively **interject** into conversations. Using a stateful conversation tracking system, it can understand the context of ongoing discussions and decide when a persona should contribute, even without being mentioned.
+The bot's core innovation is its **LLM-based Router**, which analyzes every message to understand conversational context, thread discussions, and determine if a persona should contribute, even without being directly mentioned. This structured, centralized approach enables robust and contextually-aware interactions.
 
-This architecture prioritizes phased implementation, high testability, and strategic use of sponsor technologies (Meta Llama, Cerebras, Docker) to deliver a powerful and polished hackathon project.
+This architecture prioritizes high testability and strategic use of sponsor technologies (Meta Llama, Cerebras, Docker) to deliver a powerful and polished hackathon project.
 
 ### 2. System Architecture Diagram
 
@@ -18,10 +18,11 @@ graph TD
 
     subgraph "Docker Container"
         A[Bot Service / discord.py]
-        B[Agent & Routing Logic]
+        B[Routing & Agent Logic]
         C[Configuration Manager]
         D[RAG & Vector Store]
-        G[Conversational Context Manager]
+        G[Conversation Store]
+        H[LLM Router]
     end
 
     subgraph "External Services"
@@ -31,23 +32,29 @@ graph TD
 
     User -- "Sends Message" --> E
     E -- "Message Event" --> A
-    A -- "Parses Message" --> B
+    A -- "Adds Message to Thread" --> G
+    A -- "Triggers Router" --> B
 
-    subgraph "Routing Decision"
-        B -- "No Mention" --> G
-        G -- "Routes to Conversation" --> B
-        B -- "@Persona Mention" --> B
+    B -- "Gets Active Conversations" --> G
+    B -- "Gets Persona Config" --> C
+    B -- "Builds Router Prompt" --> H
+    H -- "Uses LLM for Decision" --> F
+    F -- "Returns RouterDecision" --> H
+    H -- "Structured Decision" --> B
+
+    subgraph "Router Action"
+        B -- "Decision: Respond" --> B
+        B -- "Decision: Do Nothing" --> End
     end
 
-    B -- "Gets Persona Config" --> C
-    C -- "personas.json" --> B
-    B -- "Selects Agent & Query" --> D
+    B -- "Selects Persona & Query" --> D
     D -- "Retrieves Context" --> B
-    B -- "Crafts Prompt w/ Context" --> F
-    F -- "LLM Inference" --> B
+    B -- "Crafts Prompt w/ RAG Context" --> F
+    F -- "LLM Inference for Response" --> B
     B -- "Sends Response" --> A
     A -- "Uses Webhook for Persona" --> E
-    E -- "Posts Message" --> User```
+    E -- "Posts Message" --> User
+```
 
 ### 3. Core Components
 
@@ -58,11 +65,12 @@ graph TD
     *   The bot requires the `MANAGE_WEBHOOKS` permission in the server.
 
 #### 3.2. Agent & Routing Logic
-*   **Responsibility:** The application's central controller. It inspects incoming messages and determines the appropriate action.
-*   **Routing Scenarios:**
-    1.  **Direct Mention (`@BotName`):** The message is routed to a default, general-purpose agent.
-    2.  **Persona Mention (`@JohnPM`):** The message is routed to the specific agent for "JohnPM".
-    3.  **No Mention (Interjection):** The message is passed to the **Conversational Context Manager** to be routed to an existing or new conversation, which then informs the interjection decision.
+*   **Responsibility:** The application's central controller. It orchestrates the routing and response generation process for every message.
+*   **Workflow:**
+    1.  On receiving a message, it is first added to the appropriate conversation thread in the **Conversation Store**.
+    2.  The **LLM Router** is invoked with the context of all active conversations.
+    3.  The router returns a `RouterDecision` object, which specifies whether to respond, which persona should respond, and what historical context is relevant.
+    4.  If a response is warranted, the corresponding agent is activated, using the context provided by the router to generate a relevant reply.
 
 #### 3.3. Agent Core (`pydantic-ai`)
 *   **Responsibility:** Defines the structure and behavior of individual AI agents.
@@ -72,18 +80,13 @@ graph TD
 *   **Responsibility:** Ingests text documents, creates vector embeddings, and retrieves relevant text chunks based on a query.
 *   **Implementation:** For hackathon speed, an in-memory vector store (e.g., FAISS) or a simple file-based database (e.g., ChromaDB) will be used. Each persona will have an isolated RAG index to ensure domain-specific knowledge retrieval.
 
-#### 3.5. Conversational Context Management
-*   **Responsibility:** Tracks ongoing discussions to enable stateful, context-aware routing for the Interjection feature. This is critical for handling low-information replies (e.g., "yes", "got it").
-  Embeddings: `SentenceTransformer('all-MiniLM-L6-v2')`
-*   **State Store:** An in-memory dictionary mapping a `conversation_id` to an object containing:
-    *   `last_updated`: Timestamp for temporal decay.
-    *   `topic_embedding`: The vector embedding of an LLM-generated summary of the conversation.
-    *   `recent_message_embeddings`: A fixed-size queue (e.g., 5) of the most recent message embeddings in the conversation.
-*   **Routing Logic:** For every un-mentioned message, a hybrid score is calculated against all active conversations.
-    *   **Formula:** `Relevance Score = (Topic Match * 0.4) + (Highest Message Match * 0.6)`
-    *   **Topic Match:** Compares the new message embedding to the conversation's `topic_embedding` for broad context.
-    *   **Message Match:** Compares the new message embedding to the `recent_message_embeddings` for immediate, tactical context. The high weight solves the "yes" problem by matching it to a preceding question.
-    *   The message is routed to the conversation with the highest score above a set threshold; otherwise, a new conversation is created.
+#### 3.5. LLM Router & Conversation Store
+*   **Responsibility:** This is the brain of the bot, responsible for all context-aware decision-making.
+*   **Conversation Store:** An in-memory store that holds `ConversationThread` objects. Each thread contains a list of messages, a timestamp, and other metadata. This provides a structured history of all recent discussions.
+*   **LLM Router:**
+    *   **Trigger:** The router runs on *every* message to ensure the conversation state is always current.
+    *   **Process:** It constructs a detailed prompt for the Cerebras LLM, containing the new message, the list of available personas, and the message history from active conversation threads.
+    *   **Structured Output:** The router's primary goal is to return a Pydantic `RouterDecision` object. This structured format dictates the bot's next action, ensuring reliable and predictable behavior. It specifies the conversation thread, whether to respond, which persona to use, and which previous messages to use as context.
 
 #### 3.6. Configuration Management
 *   **Responsibility:** Externalizes all configuration.
@@ -111,49 +114,44 @@ graph TD
 
 ### 4. Data Models (Pydantic)
 
-Structured, validated output is enforced through Pydantic models.
+Structured, validated output from the LLM Router is key to the system's reliability.
 
 ```python
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 
-# For the Interjection Classifier agent
-class InterjectionDecision(BaseModel):
-    """A model to decide whether to interject in a conversation."""
-    should_interject: bool = Field(description="Set to true if the conversation warrants an answer from an AI persona.")
-    relevant_persona: Optional[str] = Field(description="The name of the most relevant persona to answer, e.g., 'JohnPM'.")
+class RouterDecision(BaseModel):
+    """
+    The structured decision made by the LLM router, determining how the bot
+    should act on an incoming message.
+    """
+    conversation_id: Optional[str] = Field(description="The ID of the conversation this message belongs to. If null, a new conversation should be created.")
+    should_respond: bool = Field(description="Whether the bot should generate and send a response to this message.")
+    confidence: float = Field(description="The router's confidence in its decision (from 0.0 to 1.0).")
+    persona_name: Optional[str] = Field(description="The name of the persona that should respond (if should_respond is true).")
+    context_messages: Optional[List[str]] = Field(description="A list of message IDs from the conversation history that are relevant for generating the response.")
+
+class ConversationThread(BaseModel):
+    """
+    Represents a single, stateful conversation thread, containing a history
+    of messages.
+    """
+    id: str
+    messages: List[dict] # Simplified for diagram, would be ConversationMessage objects
+    last_updated: float
 ```
 
-### 5. Phased Implementation & Test Plan
+### 5. Implementation & Testing
 
-#### Phase 1: The Core RAG Engine
-*   **Goal:** Create a standalone, command-line AI agent that returns a structured response from a knowledge base.
-*   **Actions:** Implement the `AIAgent` class and a `RAGTool`. The agent should use `pydantic-ai` to return a validated `AgentResponse` model.
-*   **Test Plan:** Use `pytest` and `pydantic-ai`'s `TestModel` to write unit tests that mock the LLM and verify the RAG tool is called correctly.
+#### Core Components
+1. **RAG Engine**: Standalone AI agent with knowledge base retrieval
+2. **Discord Integration**: Bot with mention detection and response handling
+3. **Multi-Persona System**: Distinct personas with specialized knowledge bases
+4. **LLM Router**: Intelligent conversation routing and context management
+5. **Conversation Store**: Thread tracking and message history
 
-#### Phase 2: Discord `@Mention` Integration
-*   **Goal:** Integrate the core agent into Discord, responding to direct mentions.
-*   **Actions:** Create the basic `discord.py` bot. Implement an `on_message` listener that checks for mentions, instantiates the default `AIAgent`, and sends the response.
-*   **Test Plan:** Manually test on a dedicated Discord server. `@BotName <question>` should return a RAG-based answer.
-
-#### Phase 3: Multi-Persona Team & Dynamic RAG
-*   **Goal:** Enable multiple, distinct personas, each with their own knowledge base and personality.
-*   **Actions:** Implement the `ConfigurationManager` to load `personas.json`. Update `on_message` to detect persona mentions (`@JohnPM`), instantiate the correct agent, and use the webhook system to send the response with the persona's name and avatar.
-*   **Test Plan:** Manually test that `@JohnPM` and `@DaveArch` respond with unique personalities, avatars, and draw from different knowledge bases.
-
-#### Phase 4: Dockerization & Context-Aware Interjection
-*   **Goal:** Containerize the application and implement the stateful, proactive interjection feature.
-*   **Actions:**
-    1.  Write the `Dockerfile` and confirm the application runs correctly as a container.
-    2.  Implement the **Conversational Context Manager** component.
-    3.  In the `on_message` handler for un-mentioned messages, use the manager's routing logic to attribute the message to a conversation.
-    4.  Create a lightweight `ClassifierAgent` that takes the full conversation context (topic, recent messages) and returns an `InterjectionDecision`.
-    5.  If `should_interject` is true, trigger the full RAG agent for the specified persona.
-*   **Test Plan:**
-    *   **Unit Tests:** Use `pytest` to test the conversation routing logic, ensuring low-information messages are correctly attributed.
-    *   **Integration Tests:** In Discord, conduct a conversation. Verify that a relevant but un-mentioned question triggers an interjection from the correct persona.
-
-#### Phase 5: Polish, Documentation, and Submission
-*   **Goal:** Finalize the project for submission.
-*   **Actions:** Add error handling, refactor code, and write a comprehensive `README.md` with clear `docker run` instructions.
-*   **Test Plan:** Perform end-to-end testing of all features. Record a demo video showcasing both the persona-mention and proactive-interjection features.
+#### Testing Strategy
+- **Unit Tests**: Use pytest to test individual components (router logic, agent responses, conversation management)
+- **Integration Tests**: Test Discord bot functionality with mock servers
+- **End-to-End Tests**: Verify complete conversation flows in Discord environment
+- **Performance Tests**: Ensure router responses are fast and accurate
